@@ -1,0 +1,88 @@
+/* -----------------------------------
+   SIDEBAR STYLES
+----------------------------------- */
+.sidebar-item {
+  cursor: pointer;
+  padding: 2px 10px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-icon {
+  font-size: 1.2rem;
+}
+
+/* -----------------------------------
+   DIVIDER
+----------------------------------- */
+.sidebar-divider {
+  border-color: rgba(0, 0, 0, 0.15);
+  margin: 12px 0;
+}
+
+/* -----------------------------------
+   DROPDOWN ARROW ROTATION
+----------------------------------- */
+.arrow {
+  transition: transform 0.25s ease;
+}
+.arrow.rotate {
+  transform: rotate(90deg);
+}
+
+/* -----------------------------------
+   SLIDE ANIMATION WRAPPER
+----------------------------------- */
+.submenu-wrapper {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+  padding-left: 20px;
+}
+
+.submenu-wrapper.open {
+  max-height: 500px;
+}
+
+.submenu-inner {
+  padding-left: 8px;
+}
+
+.submenu-wrapper .sidebar-item {
+  font-size: 0.9rem;
+}
+
+
+.sidebar-item.active {
+  background: rgba(13, 110, 253, 0.15);
+  background: rgb(224 233 216);
+  border-radius: 6px;
+  /* font-weight: 600; */
+}
+
+.sidebar-item.active .sidebar-icon {
+  filter: brightness(1.2);
+}
+
+.sidebar-item.active-parent {
+  background: rgba(108, 117, 125, 0.08);
+  border-radius: 6px;
+}
+
+.arrow.rotate {
+  transform: rotate(90deg);
+}
+
+.submenu-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.submenu-wrapper.open {
+  max-height: 400px;
+}

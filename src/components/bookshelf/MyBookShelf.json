@@ -1,0 +1,190 @@
+{
+  "id": "root",
+  "name": "Home",
+  "type": "folder",
+  "children": [
+    {
+      "id": "ai",
+      "name": "AI Research",
+      "type": "folder",
+      "children": [
+        {
+          "id": "dl",
+          "name": "Deep Learning Papers",
+          "type": "folder",
+          "children": [
+            {
+              "id": "f1",
+              "name": "Transformers in Vision.pdf",
+              "type": "file",
+              "url": "https://example.com/vision-transformers.pdf"
+            },
+            {
+              "id": "f2",
+              "name": "Neural Radiance Fields.pdf",
+              "type": "file",
+              "url": "https://example.com/nerf.pdf"
+            }
+          ]
+        },
+        {
+          "id": "ethics",
+          "name": "AI Ethics.pdf",
+          "type": "file",
+          "url": "https://example.com/ai-ethics.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "health",
+      "name": "Healthcare Papers",
+      "type": "folder",
+      "children": []
+    },
+
+    {
+      "id": "quantum",
+      "name": "Quantum Computing",
+      "type": "folder",
+      "children": [
+        {
+          "id": "qc1",
+          "name": "Quantum Entanglement Explained.pdf",
+          "type": "file",
+          "url": "https://example.com/quantum-entanglement.pdf"
+        },
+        {
+          "id": "qc2",
+          "name": "QAOA Optimization Methods.pdf",
+          "type": "file",
+          "url": "https://example.com/qaoa.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "neuro",
+      "name": "Neuroscience",
+      "type": "folder",
+      "children": [
+        {
+          "id": "brain1",
+          "name": "Brain-Computer Interface Survey.pdf",
+          "type": "file",
+          "url": "https://example.com/bci-survey.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "climate",
+      "name": "Climate Science",
+      "type": "folder",
+      "children": []
+    },
+
+    {
+      "id": "stats",
+      "name": "Statistical Learning",
+      "type": "folder",
+      "children": [
+        {
+          "id": "stat1",
+          "name": "Multivariate Regression Models.pdf",
+          "type": "file",
+          "url": "https://example.com/multivariate-regression.pdf"
+        },
+        {
+          "id": "stat2",
+          "name": "Probabilistic Graphical Models.pdf",
+          "type": "file",
+          "url": "https://example.com/pgm.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "cv",
+      "name": "Computer Vision",
+      "type": "folder",
+      "children": [
+        {
+          "id": "cv1",
+          "name": "3D Reconstruction Techniques.pdf",
+          "type": "file",
+          "url": "https://example.com/3d-reconstruction.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "nlp",
+      "name": "NLP Papers",
+      "type": "folder",
+      "children": [
+        {
+          "id": "nlp1",
+          "name": "Prompt Engineering Strategies.pdf",
+          "type": "file",
+          "url": "https://example.com/prompt-strategies.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "bio",
+      "name": "Bioinformatics",
+      "type": "folder",
+      "children": [
+        {
+          "id": "bio1",
+          "name": "Genome Sequencing Advances.pdf",
+          "type": "file",
+          "url": "https://example.com/genome-sequencing.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "philosophy",
+      "name": "Philosophy of Science.pdf",
+      "type": "file",
+      "url": "https://example.com/philosophy-science.pdf"
+    },
+
+    {
+      "id": "robotics",
+      "name": "Robotics",
+      "type": "folder",
+      "children": [
+        {
+          "id": "rob1",
+          "name": "SLAM Algorithms.pdf",
+          "type": "file",
+          "url": "https://example.com/slam.pdf"
+        },
+        {
+          "id": "rob2",
+          "name": "Humanoid Locomotion Research.pdf",
+          "type": "file",
+          "url": "https://example.com/humanoid.pdf"
+        }
+      ]
+    },
+
+    {
+      "id": "economics",
+      "name": "Economics Papers",
+      "type": "folder",
+      "children": [
+        {
+          "id": "econ1",
+          "name": "Behavioral Economics Insights.pdf",
+          "type": "file",
+          "url": "https://example.com/behavioral-econ.pdf"
+        }
+      ]
+    }
+  ]
+}

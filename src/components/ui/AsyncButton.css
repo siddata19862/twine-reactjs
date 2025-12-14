@@ -1,0 +1,233 @@
+
+.async-wrap {
+  display: inline-block;
+  
+}
+
+/* Button with flex center */
+.async-btn {
+  
+  min-height: 38px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left:25px;
+  padding-right:25px;
+}
+
+/* Success box with same alignment + border */
+.async-success-parent
+{
+    display: inline-block;
+}
+.async-success {
+  
+  min-height: 38px;
+    padding-left:25px;
+    padding-right:25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 10px;
+  border: 1px solid var(--bs-warning);
+  background: var(--bs-warning-bg-subtle);
+  color: var(--bs-warning-text);
+  font-weight: 600;
+
+  animation: fadeUp 0.4s ease forwards;
+}
+
+/* Fade animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Loader */
+.three-dots-loader {
+  display: flex;
+  gap: 6px;
+  
+}
+.three-dots-loader span {
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  background: #3fbf8a !important;
+  animation: dotPulse 0.8s infinite;
+}
+.three-dots-loader span:nth-child(2) { animation-delay: .15s; }
+.three-dots-loader span:nth-child(3) { animation-delay: .3s; }
+
+@keyframes dotPulse {
+  0%,100% { opacity: .4; transform: translateY(0); }
+  50%     { opacity: 1; transform: translateY(-4px); }
+}
+
+/* ERROR BOX */
+.async-error-parent
+{
+    display: inline-block;
+}
+.async-error {
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #ffe6e6;
+  border: 1px solid #ff8080;
+  color: #b30000;
+  text-align: center;
+  min-width: 160px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
+
+/* BASE DARK POPUP -------------------------------------------------- */
+.popup-success.popover,
+.popup-error.popover {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 10px;
+  color: #eee;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  padding: 0;
+  animation: fadePop 0.22s ease-out;
+}
+
+@keyframes fadePop {
+  from { opacity: 0; transform: translateY(4px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* BODY -------------------------------------------------------------- */
+.popup-success .popover-body,
+.popup-error .popover-body {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+
+/* SUCCESS accent ---------------------------------------------------- */
+.popup-success.popover {
+  border-color: #3fbf8a;
+  box-shadow: 0 8px 20px rgba(63,191,138,0.25);
+}
+
+.popup-success .popover-body {
+  color: #9df7d4;
+}
+
+
+/* ERROR accent ------------------------------------------------------ */
+.popup-error.popover {
+  border-color: #d9534f;
+  box-shadow: 0 8px 20px rgba(217,83,79,0.25);
+}
+
+.popup-error .popover-body {
+  color: #f8bcbc;
+}
+
+
+/* ARROW FIX ---------------------------------------- */
+/* Reset Bootstrap arrow */
+.popover.popup-success .popover-arrow::before,
+.popover.popup-error .popover-arrow::before {
+  border: none !important;
+}
+
+/* True arrow background */
+.popover.popup-success.bs-popover-top .popover-arrow::after,
+.popover.popup-error.bs-popover-top .popover-arrow::after {
+  border-top-color: #1f1f1f !important;
+}
+
+.popover.popup-success.bs-popover-bottom .popover-arrow::after,
+.popover.popup-error.bs-popover-bottom .popover-arrow::after {
+  border-bottom-color: #1f1f1f !important;
+}
+
+.popover.popup-success.bs-popover-start .popover-arrow::after,
+.popover.popup-error.bs-popover-start .popover-arrow::after {
+  border-left-color: #1f1f1f !important;
+}
+
+.popover.popup-success.bs-popover-end .popover-arrow::after,
+.popover.popup-error.bs-popover-end .popover-arrow::after {
+  border-right-color: #1f1f1f !important;
+}
+
+/* Base dark popover */
+.popup-success.popover,
+.popup-error.popover {
+  background-color: #1f1f1f;
+  border: 1px solid #333;
+  color: #eee;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* Popover body */
+.popup-success .popover-body,
+.popup-error .popover-body {
+  padding: 10px 14px;
+  color: #ddd;
+}
+
+/* Arrow color override */
+.popover.popup-success .popover-arrow::before,
+.popover.popup-error .popover-arrow::before {
+  border: none !important;
+  background: transparent !important;
+}
+
+
+.popover.popup-success.bs-popover-top .popover-arrow::after,
+.popover.popup-success.bs-popover-bottom .popover-arrow::after,
+.popover.popup-success.bs-popover-start .popover-arrow::after,
+.popover.popup-success.bs-popover-end .popover-arrow::after,
+.popover.popup-error.bs-popover-top .popover-arrow::after,
+.popover.popup-error.bs-popover-bottom .popover-arrow::after,
+.popover.popup-error.bs-popover-start .popover-arrow::after,
+.popover.popup-error.bs-popover-end .popover-arrow::after {
+  border-top-color: #1f1f1f !important;
+  border-bottom-color: #1f1f1f !important;
+  border-left-color: #1f1f1f !important;
+  border-right-color: #1f1f1f !important;
+}
+
+.bs-popover-auto[data-popper-placement^=top]>.popover-arrow::after, .bs-popover-top>.popover-arrow::after
+{
+    border-top-color: #1f1f1f !important;
+}
+
+/* Override Bootstrap fade transition */
+.popover.fade {
+  transition: none !important;
+}
+
+/* ENTER ANIMATION */
+@keyframes popEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animate when Bootstrap adds .show */
+.popover.popup-success.show,
+.popover.popup-error.show {
+  animation: popEnter 0.25s ease-out !important;
+}
