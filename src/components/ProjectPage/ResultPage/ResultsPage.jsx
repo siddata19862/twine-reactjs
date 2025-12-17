@@ -6,6 +6,8 @@ import { ChevronDown, ChevronRight, CheckCircle2, File, Folder } from "lucide-re
 import LiveLogStream from "../../LiveLogStream/LiveLogStream"
 import { LiveSystemStrip } from "../../LiveSystemStrip/LiveSystemStrip"
 import SystemMonitorCompact from "../../SystemMonitor/SystemMonitorCompact"
+import { useNavigate } from "react-router"
+import ProjectFileTree from "../../ProjectFileTree/ProjectFileTree"
 
 //import LiveLogStream from "../LiveLogStream/LiveLogStream"
 
@@ -17,9 +19,27 @@ export default function ResultsPage() {
   const [activeSubstep, setActiveSubstep] = useState(null)
   const [expandedStep, setExpandedStep] = useState(null)
 
+  const [project, setProject] = useState(null)
+
   //const [fileTree, setFileTree] = useState(null)
   const [previewFile, setPreviewFile] = useState(null)
   const [previewContent, setPreviewContent] = useState(null)
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!project) return
+
+    window.electron.invoke("fs:startSync", project.path)
+  }, [project])
+
+  useEffect(() => {
+    const load = async () => {
+      const current = await window.projectApi.getCurrent()
+      
+      setProject(current)
+    }
+    load()
+  }, [])
 
   const fileTree = [
   {
@@ -230,11 +250,11 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl mt-3">
         
         {/* HEADER */}
         <h1 className="text-3xl font-semibold text-slate-800 mb-6">
-          Analysis Results
+          
 
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-3xl font-semibold text-slate-800">
@@ -247,6 +267,16 @@ export default function ResultsPage() {
 
         {/* TABS */}
         <div className="mb-6 flex gap-2 rounded-lg bg-slate-100 p-1 w-max">
+          <button
+            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+              tab === "inputs"
+                ? "bg-white text-slate-800 shadow"
+                : "text-slate-500 hover:text-slate-700"
+            }`} onClick={()=>navigate("/project")}
+            
+          >
+            Inputs
+          </button>
           <button
             className={`px-4 py-2 rounded-md text-sm font-medium transition ${
               tab === "status"
@@ -290,6 +320,11 @@ export default function ResultsPage() {
                       return () => window.pipeline.onEnd(cb)
                     }}
                   />
+                </div>
+
+
+                <div className="rounded-md border bg-slate-50 p-3">
+                  <ProjectFileTree project={project} />
                 </div>
               </CardContent>
             </Card>

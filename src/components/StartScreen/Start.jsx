@@ -8,13 +8,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Navigate, useNavigate } from "react-router"
+import TwineLoader from "../TwineLoader/TwineLoader"
 
 export default function Start() {
   const [selectedFolder, setSelectedFolder] = useState(null)
 
   const navigate = useNavigate();
 
-
+  const [loadingProject, setLoadingProject] = useState(false)
 
 
   const handleCreateProject = async () => {
@@ -37,13 +38,31 @@ export default function Start() {
   }
   return (
     <div className="relative min-h-screen bg-[#f5f6f8] overflow-hidden">
+
+      {loadingProject && (
+  <TwineLoader
+  title="Opening Project"
+  duration={2800}
+  steps={[
+    "Scanning project workspace…",
+    "Loading Twine configuration…",
+    "Checking pipeline stages…",
+    "Validating stage checkpoints…",
+    "Resolving input/output paths…",
+    "Preparing execution environment…",
+  ]}
+  onComplete={() => navigate("/project")}
+/>
+)}
+
       {/* Background accent */}
       <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-transparent blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-8 pt-20">
         {/* Logo */}
         <div className="mb-16 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl
+  bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-lg">
             <LayoutGrid size={20} />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-800">
@@ -59,7 +78,7 @@ export default function Start() {
               <div>
                 <PlusCircle
                   size={42}
-                  className="mb-4 text-blue-600"
+                  className="mb-4 text-emerald-600"
                 />
                 <h2 className="text-2xl font-semibold text-slate-800">
                   New Project
@@ -93,7 +112,7 @@ export default function Start() {
           {/* Open Project */}
           <Card className="border-0 shadow-md transition hover:shadow-xl">
             <CardContent className="p-8">
-              <FolderOpen size={36} className="mb-4 text-indigo-600" />
+              <FolderOpen size={36} className="mb-4 text-emerald-600" />
               <h3 className="text-lg font-semibold text-slate-800">
                 Open Project
               </h3>
@@ -107,11 +126,13 @@ export default function Start() {
                 onClick={async () => {
                   const project = await window.projectApi.open()
                   if (!project) return   // user cancelled → no navigation
-                  navigate("/project")
+                  setLoadingProject(true)
+                  //navigate("/project")
                 }}
               >
                 Browse
               </Button>
+              
             </CardContent>
           </Card>
 
@@ -120,7 +141,7 @@ export default function Start() {
             <CardContent className="flex h-full gap-6 p-6">
               {/* Left content */}
               <div className="flex flex-1 flex-col">
-                <LayoutGrid size={36} className="mb-4 text-purple-600" />
+                <LayoutGrid size={36} className="mb-4 text-emerald-600" />
 
                 <h3 className="text-lg font-semibold text-slate-800">
                   My Projects
@@ -132,7 +153,7 @@ export default function Start() {
 
                 <Button
                   variant="ghost"
-                  className="mt-auto w-fit px-0 text-purple-600 hover:bg-transparent"
+                  className="mt-auto w-fit px-0 text-emerald-600 hover:bg-transparent"
                 >
                   View dashboard →
                 </Button>

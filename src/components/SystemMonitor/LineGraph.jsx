@@ -1,29 +1,36 @@
-export default function LineGraph({ data, height = 40, color }) {
-  if (!data.length) return null
+export default function LineGraph({
+  data,
+  color = "#000",
+  height = 40,
+  strokeWidth = 0.5,
+  minY = 0,
+  maxY = 100,
+}) {
+  if (!data || data.length < 2) return null
 
-  const max = 100
-  const stepX = 100 / (data.length - 1)
-
-  const points = data
-    .map((v, i) => {
-      const x = i * stepX
-      const y = height - (v / max) * height
-      return `${x},${y}`
-    })
-    .join(" ")
+  const width = 100
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width
+    const y =
+      height -
+      ((Math.min(Math.max(v, minY), maxY) - minY) /
+        (maxY - minY)) *
+        height
+    return `${x},${y}`
+  })
 
   return (
     <svg
-      viewBox={`0 0 100 ${height}`}
-      className="w-28 h-10 overflow-visible"
-      preserveAspectRatio="none"
+      viewBox={`0 0 ${width} ${height}`}
+      className="w-full h-full"
     >
       <polyline
+        points={points.join(" ")}
         fill="none"
         stroke={color}
-        strokeWidth="1"
-        points={points}
-        vectorEffect="non-scaling-stroke"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )

@@ -39,9 +39,9 @@ export default function AppLayout() {
   <MenubarMenu>
     <MenubarTrigger>File</MenubarTrigger>
     <MenubarContent>
-      <MenubarItem onClick={() => navigate("/start")}>New Project</MenubarItem>
-      <MenubarItem onClick={async ()=>{await window.projectApi.open();navigate("/project")}}>Open Project</MenubarItem>
-      <MenubarItem onClick={() => navigate("/start")}>Close Project</MenubarItem>
+      <MenubarItem onClick={() => navigate("/newproject")}>New Project</MenubarItem>
+      {/* <MenubarItem onClick={async ()=>{await window.projectApi.open();navigate("/project")}}>Open Project</MenubarItem> */}
+      <MenubarItem onClick={() => navigate("/")}>Close Project</MenubarItem>
       <MenubarItem onClick={() => navigate("/start")}>Quit Twine</MenubarItem>
     </MenubarContent>
   </MenubarMenu>

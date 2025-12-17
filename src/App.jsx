@@ -20,7 +20,7 @@ function App() {
 
       <RouterProvider router={router}>
       </RouterProvider>
-      <ReactQueryDevtools initialIsOpen={true} position="bottom"></ReactQueryDevtools>
+      
     </StrictMode>
     </QueryClientProvider>
   )

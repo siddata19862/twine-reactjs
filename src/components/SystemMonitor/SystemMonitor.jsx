@@ -59,7 +59,7 @@ export default function SystemMonitor() {
 
       <LineGraph
           data={history.cpu}
-          color="#6366f1"
+          color="#0ab568ff"
         />
 
       {/* RAM */}

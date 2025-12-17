@@ -22,7 +22,9 @@ export default function NewProject({ onCreate }) {
 
   // NEW: dropdown states
   const [technology, setTechnology] = useState("illumina")
-  const [analysisType, setAnalysisType] = useState("wes")
+  const [analysisType, setAnalysisType] = useState("mrna")
+
+  
 
   const navigate = useNavigate()
 
@@ -59,14 +61,14 @@ export default function NewProject({ onCreate }) {
       
 
       {/* Background accent */}
-      <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-transparent blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-transparent blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-3xl px-8 pt-20">
         <Card className="border-0 shadow-lg">
           <CardContent className="p-10">
             {/* Header */}
             <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow">
                 <Hammer size={18} />
               </div>
               <h1 className="text-2xl font-semibold text-slate-800">
@@ -133,11 +135,11 @@ export default function NewProject({ onCreate }) {
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="illumina">
-                      PacBio
+                    <SelectItem value="illumina" disabled>
+                      Illumina (Default)
                     </SelectItem>
                     <SelectItem value="pacbio">
-                      Illumina (Default)
+                      PacBio
                     </SelectItem>
 
                     <SelectItem value="nanopore" disabled>
@@ -165,10 +167,10 @@ export default function NewProject({ onCreate }) {
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="mrna">
+                    <SelectItem value="rna">
                       RNA Sequencing
                     </SelectItem>
-                    <SelectItem value="rna">
+                    <SelectItem value="mrna">
                       mRNA Sequencing
                     </SelectItem>
                     <SelectItem value="wes">
@@ -202,7 +204,7 @@ export default function NewProject({ onCreate }) {
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="ghost">
+                <Button variant="ghost" onClick={()=>navigate("/start")} className="text-emerald-600">
                   Cancel
                 </Button>
 
