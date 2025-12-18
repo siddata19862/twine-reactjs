@@ -4,6 +4,8 @@ import {
   LayoutGrid,
 } from "lucide-react"
 
+import logo from "/logo.png"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -56,17 +58,15 @@ export default function Start() {
 )}
 
       {/* Background accent */}
-      <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-transparent blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-transparent blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-8 pt-20">
         {/* Logo */}
         <div className="mb-16 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl
-  bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-lg">
-            <LayoutGrid size={20} />
-          </div>
+          
+          <img src={logo} alt="Logo" className="h-[150px]" />
           <h1 className="text-2xl font-semibold tracking-tight text-slate-800">
-            Twine Desktop
+            Desktop
           </h1>
         </div>
 

@@ -252,7 +252,7 @@ export default function ProjectPage() {
   return (
     <div className="relative min-h-screen bg-[#f5f6f8] overflow-hidden">
       {/* background accent */}
-      <div className="pointer-events-none absolute top-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-blue-500/20 via-indigo-500/20 to-transparent blur-3xl" />
+      <div className="pointer-events-none absolute top-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-transparent blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-10 pt-14">
         {/* HEADER */}
@@ -617,18 +617,13 @@ export default function ProjectPage() {
                     Ready to run
                   </h3>
 
-                  <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-600 space-y-1">
-                    <p>• FASTQ files: {project.fastq?.files?.length ?? 0}</p>
-                    <p>• Pipeline: DADA2</p>
-                    <p>• Output: Runs/</p>
-                  </div>
-
+                  
                   <Button className="mt-2" onClick={runPipeline}>
                     Start analysis
-                  </Button>
+                  </Button> &nbsp;
 
                   <Button className="mt-2" onClick={() => { navigate("/results") }}>
-                    Start analysis
+                    Outputs
                   </Button>
                 
                   <br /><br />
