@@ -4,7 +4,7 @@ import { useNavigate } from "react-router"
 const Styles = {
   splash: {
     height: "100vh",
-    background: "#114b28ff",
+    background: "#0f172a",
     color: "#ffffff",
     display: "flex",
     flexDirection: "column",
