@@ -11,11 +11,31 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import TwineLoader from "../TwineLoader/TwineLoader"
+import { FastqDropZone } from "../DropZone/DropZone"
 
 export default function Start() {
   const [selectedFolder, setSelectedFolder] = useState(null)
 
   const navigate = useNavigate();
+
+  const handleFolderDrop = async (e,folder) => {
+  e.preventDefault()
+
+  console.log("e",e);
+  const item = e.dataTransfer.files?.[0]
+  if (!item?.path) return
+
+  const result = await window.api.scanFastqFolder(item.path)
+
+  if (result.success) {
+    setSelectedFolder(result.root)
+    setFastqFiles(result.files)
+    navigate("/newproject", {
+      state: result,
+    })
+  }
+}
+
 
   const [loadingProject, setLoadingProject] = useState(false)
 
@@ -23,9 +43,9 @@ export default function Start() {
   const handleCreateProject = async () => {
     const folderPath = await window.dialogApi.selectFolder()
 
-    
+
     if (!folderPath) return
-    
+
 
     setSelectedFolder(folderPath)
     const res = await window.projectApi.create({
@@ -42,20 +62,20 @@ export default function Start() {
     <div className="relative min-h-screen bg-[#f5f6f8] overflow-hidden">
 
       {loadingProject && (
-  <TwineLoader
-  title="Opening Project"
-  duration={2800}
-  steps={[
-    "Scanning project workspace…",
-    "Loading Twine configuration…",
-    "Checking pipeline stages…",
-    "Validating stage checkpoints…",
-    "Resolving input/output paths…",
-    "Preparing execution environment…",
-  ]}
-  onComplete={() => navigate("/project")}
-/>
-)}
+        <TwineLoader
+          title="Opening Project"
+          duration={2800}
+          steps={[
+            "Scanning project workspace…",
+            "Loading Twine configuration…",
+            "Checking pipeline stages…",
+            "Validating stage checkpoints…",
+            "Resolving input/output paths…",
+            "Preparing execution environment…",
+          ]}
+          onComplete={() => navigate("/project")}
+        />
+      )}
 
       {/* Background accent */}
       <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-transparent blur-3xl" />
@@ -63,7 +83,7 @@ export default function Start() {
       <div className="relative z-10 mx-auto max-w-5xl px-8 pt-20">
         {/* Logo */}
         <div className="mb-16 flex items-center gap-3">
-          
+
           <img src={logo} alt="Logo" className="h-[150px]" />
           <h1 className="text-2xl font-semibold tracking-tight text-slate-800">
             Desktop
@@ -73,41 +93,119 @@ export default function Start() {
         {/* Main actions */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* New Project */}
-          <Card className="group col-span-1 md:col-span-2 border-0 shadow-md transition hover:shadow-xl">
-            <CardContent className="flex h-full flex-col justify-between p-8">
-              <div>
-                <PlusCircle
-                  size={42}
-                  className="mb-4 text-emerald-600"
-                />
-                <h2 className="text-2xl font-semibold text-slate-800">
-                  New Project
-                </h2>
-                <p className="mt-2 text-sm">
-                  Start a new analysis pipeline or workspace
-                </p>
-              </div>
+{/* New Project */}
+<Card className="group col-span-1 md:col-span-2 border-0 shadow-md transition hover:shadow-xl">
+  <CardContent className="flex h-full flex-col gap-6 p-8">
 
-              
+    {/* Header row */}
+    <div className="flex items-start justify-between gap-6">
+      <div className="flex items-start gap-4">
+        <PlusCircle size={38} className="mt-1 text-emerald-600" />
+
+        <div>
+          <h2 className="text-xl font-semibold text-slate-800">
+            New Project
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Start a new analysis pipeline or workspace
+          </p>
+        </div>
+      </div>
+
       <Button
         variant="outline"
-        className="mt-6 w-fit px-6 h-10"
-        onClick={()=>navigate("/newproject")}
+        className="h-10 shrink-0 px-6"
+        onClick={() => navigate("/newproject")}
       >
         Create Project
       </Button>
+    </div>
 
-      {/* Show selected folder */}
-      {selectedFolder && (
-        <p className="mt-4 text-sm text-slate-600">
+    {/* OR Divider */}
+    <div className="relative flex items-center">
+      <div className="flex-grow border-t border-muted" />
+      <span className="mx-3 text-xs uppercase tracking-wide text-muted-foreground">
+        OR
+      </span>
+      <div className="flex-grow border-t border-muted" />
+    </div>
+
+<FastqDropZone
+  onDrop={async (paths) => {
+    try {
+      const { fastqFiles, project } =
+        await window.api.collectAndCreate(paths)
+
+      setProject(project)
+    } catch (err) {
+      
+      if (err) {
+        const ok = window.confirm(
+          "A Twine project already exists in this folder.\n\nDo you want to overwrite it?"
+        )
+
+        if (!ok) return
+
+        // Retry with overwrite = true
+        const { fastqFiles, project } =
+          await window.api.collectAndCreate(paths, true)
+
+        //setProject(project)
+        navigate("/project")
+      } else {
+        console.error(err)
+        alert("Failed to create project")
+      }
+    }
+  }}
+/>
+    {/* Drop zone (PROMINENT) */}
+    <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault()
+        const folder = e.dataTransfer.files?.[0]
+        if (folder) {
+          
+          handleFolderDrop(e,folder)
+        }
+      }}
+      className="
+        flex flex-col items-center justify-center gap-3
+        rounded-2xl border-2 border-dashed border-emerald-400/70
+        bg-emerald-50/60
+        p-10 text-center
+        transition
+        hover:border-emerald-500 hover:bg-emerald-100/60
+      "
+    >
+      <FolderOpen className="h-10 w-10 text-emerald-600" />
+
+      <p className="text-base font-semibold text-slate-800">
+        Drag your FASTQ folder here
+      </p>
+
+      <p className="max-w-sm text-sm text-slate-600">
+        Drop a folder containing FASTQ files to instantly create
+        a new project and begin analysis
+      </p>
+    </div>
+
+    {/* Selected folder */}
+    {selectedFolder && (
+      <div className="flex items-center gap-2 text-sm text-slate-700">
+        <Upload className="h-4 w-4 text-emerald-600" />
+        <span>
           Selected folder:
-          <span className="ml-1 font-medium text-slate-800">
+          <span className="ml-1 font-medium text-slate-900">
             {selectedFolder.split("/").pop()}
           </span>
-        </p>
-      )}
-            </CardContent>
-          </Card>
+        </span>
+      </div>
+    )}
+
+  </CardContent>
+</Card>
 
           {/* Open Project */}
           <Card className="border-0 shadow-md transition hover:shadow-xl">
@@ -132,7 +230,7 @@ export default function Start() {
               >
                 Browse
               </Button>
-              
+
             </CardContent>
           </Card>
 

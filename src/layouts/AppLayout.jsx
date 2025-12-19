@@ -1,9 +1,5 @@
 import { Outlet, useLoaderData, useNavigate } from "react-router";
-import SpeakerSidebar from "../components/sidebar/SpeakerSidebar";
-import UserSidebar from "../components/sidebar/UserSidebar";
-import SpeakerTopbar from "../components/topbar/SpeakerTopbar";
-import UserTopbar from "../components/topbar/UserTopbar";
-import { useEffect } from "react";
+
 
 import {
   Menubar,
@@ -23,11 +19,6 @@ export default function AppLayout() {
   const user = useLoaderData(); // injected by router
   const navigate = useNavigate();
   
-  const Topbar = UserTopbar;
-
-  useEffect(()=>{
-    console.log("user",user);
-  });
   
 
   return (
