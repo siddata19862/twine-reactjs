@@ -91,7 +91,7 @@ export default function NewProject({ onCreate }) {
 
               {/* Project Directory */}
               <div className="space-y-2">
-                <Label>Project directory</Label>
+                <Label>Output Folder</Label>
 
                 <div className="flex gap-3">
                   <Input
@@ -114,7 +114,7 @@ export default function NewProject({ onCreate }) {
 
                 <p className="text-xs text-slate-500">
                   This directory should be empty. All pipeline outputs will be
-                  created here. You can add FASTQ files later.
+                  created here. You can add FASTQ files in the next step.
                   <br />
                   <b>
                     Note: Please select an existing directory only. Newly created

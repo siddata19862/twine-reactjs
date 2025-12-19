@@ -10,9 +10,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function App() {
 
-    useEffect(() => {
-    document.title = "My Neuron";
-  }, []);
+   
   const client = new QueryClient();
   return (
     <QueryClientProvider client={client}>
