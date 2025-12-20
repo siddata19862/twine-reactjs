@@ -9,6 +9,7 @@ import ProjectPage from "../components/ProjectPage/ProjectPage";
 import SplashScreen from "../pages/Splash/SplashScreen";
 import ResultsPage from "../components/ProjectPage/ResultPage/ResultsPage";
 import StartUbuntu from "../components/StartScreen/StartUbuntu";
+import ProjectPageUbuntu from "../components/ProjectPage/ProjectPageUbuntu";
 
 
 export const router = createBrowserRouter
@@ -26,7 +27,7 @@ export const router = createBrowserRouter
         
         {
           path: "/",
-          element: <SplashScreen />,
+          element: <StartUbuntu />,
           loader: () => {
             
           }
@@ -36,10 +37,10 @@ export const router = createBrowserRouter
         
         
         { path: "/filemanager2", element: <FileManager /> },
-        { path: "/project", element: <ProjectPage /> },
+        { path: "/project", element: <ProjectPageUbuntu /> },
         { path: "/results", element: <ResultsPage /> },
         { path: "/newproject", element: <NewProject /> },
-        { path: "/start", element: <StartUbuntus /> },
+        { path: "/start", element: <StartUbuntu /> },
         
 
         

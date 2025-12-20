@@ -11,9 +11,49 @@ import { useNavigate } from "react-router"
 
 import TwineLoader from "../TwineLoader/TwineLoader"
 import { FastqDropZone } from "../DropZone/DropZone"
+import TreeNode from "../TreeNode/TreeNode"
 
 export default function StartUbuntu() {
   const navigate = useNavigate()
+
+  const FASTQ_PREVIEW = {
+  name: "Raw_Data",
+  type: "folder",
+  children: [
+    {
+      name: "Sample_Set_A",
+      type: "folder",
+      children: [
+        {
+          type: "pair",
+          sample: "S1",
+          files: [
+            { name: "S1_R1.fastq.gz", read: "R1" },
+            { name: "S1_R2.fastq.gz", read: "R2" },
+          ],
+        },
+        {
+          type: "pair",
+          sample: "S2",
+          files: [
+            { name: "S2_R1.fastq.gz", read: "R1" },
+            { name: "S2_R2.fastq.gz", read: "R2" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Unsorted",
+      type: "folder",
+      children: [
+        {
+          type: "single",
+          name: "unknown_sample.fastq",
+        },
+      ],
+    },
+  ],
+}
 
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [loadingProject, setLoadingProject] = useState(false)
@@ -36,7 +76,7 @@ export default function StartUbuntu() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e6e6e6] text-slate-800">
+    <div className="min-h-screen bg-[#f4f6f8] text-slate-800">
 
       {/* Loader */}
       {loadingProject && (
@@ -57,9 +97,10 @@ export default function StartUbuntu() {
       {/* ---------------- Header ---------------- */}
       <header className="
         flex items-center gap-4
-        border-b border-[#cfcfcf]
-        bg-[#f2f2f2]
-        px-6 py-4 mt-8
+        border-b border-[#d6dbe0]
+        bg-[#fafafa]
+        px-6 py-4
+        shadow-sm
       ">
         <img src={logo} alt="Twine Logo" className="h-15 w-32" />
 
@@ -78,13 +119,15 @@ export default function StartUbuntu() {
 
         <div className="
           grid grid-cols-[3fr_2fr]
-          border border-[#cfcfcf]
+          border border-[#d6dbe0]
+          bg-white
+          shadow-sm
         ">
 
           {/* ================= LEFT PANE ================= */}
           <section className="
-            bg-[#f7f7f7]
-            border-r border-[#cfcfcf]
+            bg-white
+            border-r border-[#e2e6ea]
             p-6
             space-y-6
           ">
@@ -105,16 +148,23 @@ export default function StartUbuntu() {
                 className="
                   h-8
                   rounded
-                  border border-[#bfbfbf]
-                  bg-[#eaeaea]
+                  border border-[#c9cfd6]
+                  bg-[#f1f3f5]
                   px-3 text-xs
                   text-slate-800
-                  hover:bg-[#dedede]
-                  active:bg-[#d4d4d4]
+                  hover:bg-[#e7eaee]
+                  active:bg-[#dde1e6]
                 "
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Empty Project
+              </Button>
+              <Button onClick={()=>navigate("/newproject")}>
+                New
+              </Button>
+
+              <Button onClick={()=>window.electronAPI.generateScripts()}>
+                Generate Scripts
               </Button>
             </div>
 
@@ -135,14 +185,14 @@ export default function StartUbuntu() {
                 }
               }}
               className="
-                border border-dashed border-[#9fb7a7]
-                bg-[#eef4ef]
+                border border-dashed border-[#9ec5ad]
+                bg-[#f3faf6]
                 p-10
                 text-center
-                hover:bg-[#e4eee6]
+                hover:bg-[#eaf6ef]
               "
             >
-              <FolderOpen className="mx-auto h-10 w-10 text-[#4f7f62]" />
+              <FolderOpen className="mx-auto h-10 w-10 text-[#4f8f6b]" />
 
               <p className="mt-4 text-sm font-medium">
                 Drop FASTQ folder here
@@ -152,6 +202,17 @@ export default function StartUbuntu() {
                 Project will be created automatically
               </p>
             </FastqDropZone>
+
+            {/* FASTQ Preview */}
+<div className="rounded border border-[#d6dbe0] bg-white p-4">
+  <h4 className="mb-2 text-xs font-semibold text-slate-700">
+    Detected FASTQ Files
+  </h4>
+
+  <div className="max-h-[260px] overflow-auto font-mono">
+    <TreeNode node={FASTQ_PREVIEW} />
+  </div>
+</div>
 
             {/* Selected Folder */}
             {selectedFolder && (
@@ -166,7 +227,7 @@ export default function StartUbuntu() {
 
           {/* ================= RIGHT PANE ================= */}
           <aside className="
-            bg-[#efefef]
+            bg-[#f8f9fb]
             p-6
             space-y-6
           ">
@@ -179,7 +240,7 @@ export default function StartUbuntu() {
 
               <Button
                 variant="outline"
-                className="w-full h-8 text-xs"
+                className="w-full h-8 text-xs bg-white"
                 onClick={async () => {
                   const project = await window.projectApi.open()
                   if (!project) return
@@ -191,7 +252,7 @@ export default function StartUbuntu() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-[#cfcfcf]" />
+            <div className="border-t border-[#dde2e7]" />
 
             {/* Recent Projects */}
             <div>
@@ -210,8 +271,9 @@ export default function StartUbuntu() {
                     key={name}
                     className="
                       cursor-pointer
+                      rounded
                       px-2 py-1
-                      hover:bg-[#e0e0e0]
+                      hover:bg-[#edf1f5]
                     "
                   >
                     {name}

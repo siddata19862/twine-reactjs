@@ -16,11 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export default function NewProject() {
+export default function NewProjectUbuntu() {
   const navigate = useNavigate()
 
   const [projectName, setProjectName] = useState("")
-  const [projectDir, setProjectDir] = useState<string | null>(null)
+  const [projectDir, setProjectDir] = useState(null)
   const [technology, setTechnology] = useState("illumina")
   const [analysisType, setAnalysisType] = useState("mrna")
 
@@ -45,7 +45,6 @@ export default function NewProject() {
 
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-800">
-
       {/* ---------------- Header ---------------- */}
       <header
         className="
@@ -68,7 +67,6 @@ export default function NewProject() {
 
       {/* ---------------- Main Layout ---------------- */}
       <main className="mx-auto max-w-6xl px-6 py-6">
-
         <div
           className="
             grid grid-cols-[3fr_2fr]
@@ -77,7 +75,6 @@ export default function NewProject() {
             shadow-sm
           "
         >
-
           {/* ================= LEFT PANE ================= */}
           <section
             className="
@@ -216,13 +213,7 @@ export default function NewProject() {
           </section>
 
           {/* ================= RIGHT PANE ================= */}
-          <aside
-            className="
-              bg-[#f8f9fb]
-              p-6
-              space-y-4
-            "
-          >
+          <aside className="bg-[#f8f9fb] p-6 space-y-4">
             <h3 className="text-xs font-semibold uppercase text-slate-700">
               What happens next
             </h3>
@@ -235,11 +226,9 @@ export default function NewProject() {
             </ul>
 
             <div className="border-t border-[#dde2e7] pt-4 text-[11px] text-slate-500">
-              Tip: Drop a FASTQ folder on the start screen to auto-create
-              projects.
+              Tip: Drop a FASTQ folder on the start screen to auto-create projects.
             </div>
           </aside>
-
         </div>
 
         <p className="mt-6 text-[10px] text-slate-500">
