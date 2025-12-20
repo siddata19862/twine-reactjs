@@ -5,51 +5,41 @@ import {
   ChevronRight,
   ChevronDown,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 
 const INDENT = 16
 const CHECK_COL = "w-5 flex justify-center shrink-0"
 
 /* =========================================================
-   PairNode — single source of truth for FASTQ selection
+   PairNode — single selectable FASTQ unit
    ========================================================= */
 function PairNode({ node, depth, forceCheck, onSelectionChange }) {
   const [checked, setChecked] = useState(false)
 
-  /* ---------- propagate folder/root selection ---------- */
-  useEffect(() => {
-    if (typeof forceCheck === "boolean") {
-      setChecked(forceCheck)
+  // IMPORTANT: parent only forces TRUE, never FALSE
+  const effectiveChecked =
+    forceCheck === true ? true : checked
+
+  const paths =
+    node.files?.map(f => f.path).filter(Boolean) ?? []
+
+  const toggle = () => {
+    const next = !effectiveChecked
+    setChecked(next)
+
+    if (!onSelectionChange || !paths.length) return
+
+    if (next) {
+      onSelectionChange(prev =>
+        Array.from(new Set([...prev, ...paths]))
+      )
+    } else {
+      onSelectionChange(prev =>
+        prev.filter(p => !paths.includes(p))
+      )
     }
-  }, [forceCheck])
-
-  /* ---------- emit FASTQ paths upward ---------- */
-  useEffect(() => {
-    
-  if (!onSelectionChange) return
-  if (node.type !== "pair") return
-  
-
-  const paths = node.files
-    ?.map(f => f.path)
-    .filter(Boolean)
-
-    
-
-  if (!paths.length) return
-
-  if (checked) {
-    onSelectionChange(prev => {
-      console.log("paths", paths)
-      return [...new Set([...prev, ...paths])]
-    })
-  } else {
-    onSelectionChange(prev =>
-      prev.filter(p => !paths.includes(p))
-    )
   }
-}, [checked])
 
   return (
     <div>
@@ -61,14 +51,14 @@ function PairNode({ node, depth, forceCheck, onSelectionChange }) {
           rounded px-2 py-1 cursor-pointer
           hover:bg-slate-50
         "
-        onClick={() => setChecked(v => !v)}
+        onClick={toggle}
       >
         <div className={CHECK_COL}>
           <Checkbox
-            checked={checked}
+            checked={effectiveChecked}
             onClick={(e) => {
               e.stopPropagation()
-              setChecked(v => !v)
+              toggle()
             }}
           />
         </div>
@@ -79,7 +69,7 @@ function PairNode({ node, depth, forceCheck, onSelectionChange }) {
         </span>
       </div>
 
-      {/* FASTQ files (visual only, not independent) */}
+      {/* FASTQ rows — visual only */}
       {node.files.map((f, i) => (
         <div
           key={i}
@@ -90,10 +80,10 @@ function PairNode({ node, depth, forceCheck, onSelectionChange }) {
             cursor-pointer
             hover:bg-slate-50
           "
-          onClick={() => setChecked(v => !v)}
+          onClick={toggle}
         >
           <div className={CHECK_COL}>
-            <Checkbox checked={checked} />
+            <Checkbox checked={effectiveChecked} />
           </div>
 
           <FileText className="h-4 w-4 text-slate-400 shrink-0" />
@@ -114,7 +104,7 @@ function PairNode({ node, depth, forceCheck, onSelectionChange }) {
 }
 
 /* =========================================================
-   TreeNode — recursive, hook-safe
+   TreeNode — folder owns subtree selection
    ========================================================= */
 export default function TreeNode({
   node,
@@ -125,12 +115,10 @@ export default function TreeNode({
   const [open, setOpen] = useState(true)
   const [checked, setChecked] = useState(false)
 
-  /* ---------- propagate parent selection ---------- */
-  useEffect(() => {
-    if (typeof forceCheck === "boolean") {
-      setChecked(forceCheck)
-    }
-  }, [forceCheck])
+  // CRITICAL RULE:
+  // parent forces children ON only
+  const effectiveChecked =
+    forceCheck === true ? true : checked
 
   /* ---------- Folder ---------- */
   if (node.type === "folder") {
@@ -144,7 +132,7 @@ export default function TreeNode({
             hover:bg-yellow-50
           "
         >
-          {/* expand / collapse ONLY */}
+          {/* expand / collapse */}
           <div
             className="cursor-pointer"
             onClick={() => setOpen(v => !v)}
@@ -158,7 +146,7 @@ export default function TreeNode({
 
           <div className={CHECK_COL}>
             <Checkbox
-              checked={checked}
+              checked={effectiveChecked}
               onClick={(e) => {
                 e.stopPropagation()
                 setChecked(v => !v)
@@ -181,7 +169,7 @@ export default function TreeNode({
               key={i}
               node={c}
               depth={depth + 1}
-              forceCheck={checked}
+              forceCheck={effectiveChecked}
               onSelectionChange={onSelectionChange}
             />
           ))}
@@ -201,7 +189,7 @@ export default function TreeNode({
     )
   }
 
-  /* ---------- Single / Unsorted (display only) ---------- */
+  /* ---------- Single / Unsorted ---------- */
   return (
     <div
       style={{ paddingLeft: depth * INDENT }}
@@ -216,5 +204,3 @@ export default function TreeNode({
     </div>
   )
 }
-
-

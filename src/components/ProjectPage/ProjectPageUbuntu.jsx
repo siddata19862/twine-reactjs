@@ -125,6 +125,7 @@ export default function ProjectPageUbuntu() {
 
   useEffect(() => {
     if (!project) return
+    console.log("syncing");
     window.electron.invoke("fs:startSync", project.path)
   }, [project])
 

@@ -32,7 +32,8 @@
     "remixicon": "^4.7.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
-    "xel": "^0.39.0"
+    "xel": "^0.39.0",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

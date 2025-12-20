@@ -28,7 +28,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     if (!project) return
-
+    console.log("starting sync");
     window.electron.invoke("fs:startSync", project.path)
   }, [project])
 
