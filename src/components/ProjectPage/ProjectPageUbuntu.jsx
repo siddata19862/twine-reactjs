@@ -45,7 +45,7 @@ import PipelinePanel from "../pipelineStatus/PipelinePanel"
 
 export default function ProjectPageUbuntu() {
   const [project, setProject] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
 
   
@@ -57,7 +57,7 @@ export default function ProjectPageUbuntu() {
     //console.log("mytwine",twine);
     if(!twine) return;
     console.log("dockerlog","twine-"+twine?.projectId);
-    
+    console.log("twine",twine);
     //window.electron.invoke("docker:logs","twine-"+twine?.projectId);
   },[twine]);
 
@@ -65,10 +65,12 @@ export default function ProjectPageUbuntu() {
 
   /* ---------------- FASTQ grouping ---------------- */
   function groupFastqBySample(files = []) {
+    console.log("grouping",files);
     const groups = {}
 
     files.forEach((file) => {
-      const match = file.name.match(/^(.+)_R([12])_\d+\.fastq(\.gz)?$/i)
+      const match = file.name.match(/^(.+)_R([12])_\d+.*\.fastq(\.gz)?$/i)
+      //console.log("match",match);
       if (!match) return
 
       const sample = match[1]
@@ -77,13 +79,15 @@ export default function ProjectPageUbuntu() {
       if (!groups[sample]) groups[sample] = { R1: null, R2: null }
       groups[sample][read] = file
     })
+    console.log("returniing",groups);
 
     return groups
   }
 
   const groupedFastq = useMemo(
-    () => groupFastqBySample(project?.fastq?.files || []),
-    [project?.fastq?.files]
+    
+    () => groupFastqBySample(twine?.fastq?.files || []),
+    [twine?.fastq?.files]
   )
 
   const [expandedSamples, setExpandedSamples] = useState({})
@@ -131,20 +135,20 @@ export default function ProjectPageUbuntu() {
     setPipelineConfig((p) => ({ ...p, [k]: v }))
 
   /* ---------------- effects ---------------- */
-  useEffect(() => {
+  /*useEffect(() => {
     const load = async () => {
       const current = await window.projectApi.getCurrent()
       setProject(current)
       setLoading(false)
     }
     load()
-  }, [])
+  }, [])*/
 
   useEffect(() => {
-    if (!project) return
+    if (!twine) return
     console.log("syncing");
-    window.electron.invoke("fs:startSync", project.path)
-  }, [project])
+    window.electron.invoke("fs:startSync", twine.path)
+  }, [twine])
 
   /* ---------------- actions ---------------- */
   const addFastq = async () => {
@@ -188,7 +192,7 @@ export default function ProjectPageUbuntu() {
   const steps = ["Files", "Configure", "Settings", "Run","Output"]
 
   /* ---------------- guards ---------------- */
-  if (loading) {
+  if (loading || !twine) {
     return (
       <div className="flex h-screen items-center justify-center text-sm text-slate-500">
         Loading project…
@@ -249,18 +253,25 @@ export default function ProjectPageUbuntu() {
                   variant="outline"
                   className="h-8 text-xs"
                 >
-                  Add FASTQ files
+                  Add External FASTQ files
                 </Button>
 
-                <PipelinePanel />
+                
 
                 <FastqDropZone
                   onDrop={async (paths) => {
                     const files = await window.fastqApi.collect(paths)
                     const updated = await window.projectApi.addFastq(files)
                     setProject(updated)
-                  }}
-                />
+                  }}>
+                    <p className="text-slate-600">
+        Drag individual FASTQ files here (Not Folders) that are not in the current directory
+      </p>
+      <p className="mt-1 text-xs text-slate-400">
+        Files are referenced, not copied
+      </p>
+                  </FastqDropZone>
+
 
                 {Object.entries(groupedFastq).map(([sample, reads]) => {
                   const open = expandedSamples[sample]
@@ -326,6 +337,71 @@ export default function ProjectPageUbuntu() {
               </div>
             )}
 
+
+
+            {activeStep === 2 && (
+  <div className="space-y-6">
+    <h3 className="text-sm font-medium text-slate-700">
+      Sample settings
+    </h3>
+
+    <p className="text-sm text-slate-500">
+      Assign friendly names to samples. These names will appear in
+      statistics, charts, and reports.
+    </p>
+
+    <div className="overflow-hidden rounded-lg border bg-white">
+      <table className="w-full border-collapse text-sm">
+        <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <tr className="border-b">
+            <th className="px-4 py-3 text-left font-semibold">
+              Sample ID
+            </th>
+            <th className="px-4 py-3 text-left font-semibold">
+              Display name (Group)
+            </th>
+            
+          </tr>
+        </thead>
+
+        <tbody className="divide-y">
+          {Object.entries(
+            groupFastqBySample(twine.fastq?.files || [])
+          ).map(([sample, reads]) => (
+            <tr
+              key={sample}
+              className="hover:bg-slate-50 transition"
+            >
+              {/* Sample ID */}
+              <td className="px-4 py-3 align-top">
+                <p className="font-mono text-xs text-slate-800 break-all">
+                  {sample}
+                </p>
+              </td>
+
+              {/* Display name */}
+              <td className="px-4 py-3 align-top">
+                <input
+                  type="text"
+                  placeholder="e.g. Stool – Subject A"
+                  className="w-full rounded-md border px-3 py-1.5 text-sm
+                             focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                />
+              </td>
+
+              
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p className="text-xs text-slate-400">
+      Sample IDs are derived from filenames and cannot be changed.
+    </p>
+  </div>
+)}
+
             {/* -------- RUN -------- */}
             {activeStep === 3 && (
               <div className="space-y-4">
@@ -358,7 +434,7 @@ export default function ProjectPageUbuntu() {
             </h3>
 
             <div className="border rounded bg-white p-3">
-              <ProjectFileTree project={project} />
+              <ProjectFileTree project={twine} />
             </div>
           </aside>
         </div>

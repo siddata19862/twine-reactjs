@@ -61,7 +61,7 @@ export default function ProjectsList({ mode = "full" }) {
   key={p.projectId}
   onClick={async () => {
     await window.electron.invoke("project:open", p.twinePath)
-    navigate("/newproject")
+    navigate("/project")
   }}
   className={`
     cursor-pointer

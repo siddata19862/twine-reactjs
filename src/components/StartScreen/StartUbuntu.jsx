@@ -69,44 +69,7 @@ export default function StartUbuntu() {
 
 
     console.log("currenttwine",window.projectApi.getCurrent());
-    const [fastqPreview, setFastqPreview] = useState({
-        name: "Raw_Data",
-        type: "folder",
-        children: [
-        {
-            name: "Sample_Set_A",
-            type: "folder",
-            children: [
-            {
-                type: "pair",
-                sample: "S1",
-                files: [
-                { name: "S1_R1.fastq.gz", read: "R1" },
-                { name: "S1_R2.fastq.gz", read: "R2" },
-                ],
-            },
-            {
-                type: "pair",
-                sample: "S2",
-                files: [
-                { name: "S2_R1.fastq.gz", read: "R1" },
-                { name: "S2_R2.fastq.gz", read: "R2" },
-                ],
-            },
-            ],
-        },
-        {
-            name: "Unsorted",
-            type: "folder",
-            children: [
-            {
-                type: "single",
-                name: "unknown_sample.fastq",
-            },
-            ],
-        },
-        ],
-    })
+    const [fastqPreview, setFastqPreview] = useState(null)
 
 
     const [selectedFolder, setSelectedFolder] = useState(null)
@@ -197,14 +160,14 @@ export default function StartUbuntu() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h2 className="text-sm font-semibold">
-                                    New Project
+                                    New Analysis
                                 </h2>
                                 <p className="mt-1 text-xs text-slate-600">
                                     Create a new analysis workspace
                                 </p>
                             </div>
 
-                            <Button
+                            {/*<Button
                                 onClick={handleCreateProject}
                                 className="
                   h-8
@@ -222,13 +185,13 @@ export default function StartUbuntu() {
                             </Button>
                             <Button onClick={() => navigate("/newproject")}>
                                 New
-                            </Button>
+                            </Button>*/}
 
                             
                         </div>
-                        <Button className="mt-2" onClick={runPipeline}>
+                        {/*<Button className="mt-2" onClick={runPipeline}>
                     Start analysis
-                  </Button>
+                  </Button>*/}
 
                         {/* Drop Zone */}
                         <FastqDropZone
@@ -238,15 +201,21 @@ export default function StartUbuntu() {
                                     console.log("paths",paths);
                                     
                                     await window.api.collectAndCreate(paths)
+                                    /* Since new project is added, update projects list */
                                     useProjectRegistryStore.getState().refresh()
-                                    //navigate("/project")
+                                    navigate("/newproject")
                                 } catch (err) {
-                                    const ok = window.confirm(
-                                        "A Twine project already exists in this folder.\n\nOverwrite it?"
+                                    const ok = window.alert(
+                                        "A Twine project already exists in this folder.\n\n Opening the project instead.."
                                     )
-                                    if (!ok) return
-
-                                    await window.api.collectAndCreate(paths, true)
+                                    //if (!ok) return
+                                    //alert(JSON.stringify(err));
+                                    //return
+                                    //await window.electron.invoke("project:open", p.twinePath)
+                                    navigate("/project")
+                                    
+                                    
+                                    //await window.api.collectAndCreate(paths, true)
                                     //navigate("/project")
                                 }
                             }}
@@ -258,19 +227,23 @@ export default function StartUbuntu() {
                                 hover:bg-[#eaf6ef]
                             "
                         >
-                            <FolderOpen className="mx-auto h-10 w-10 text-[#4f8f6b]" />
+                            <div className="cursor-pointer select-none text-center">
+  <FolderOpen className="mx-auto h-10 w-10 text-[#4f8f6b]" />
 
-                            <p className="mt-4 text-sm font-medium">
-                                Drop FASTQ folder here
-                            </p>
+  <p className="mt-4 text-sm font-medium">
+  Click to select a folder or drop a folder containing your FASTQ files here
+</p>
 
-                            <p className="mt-1 text-xs text-slate-600">
-                                Project will be created automatically
-                            </p>
+  <p className="text-xs text-slate-600">
+  You will be redirected to the Create Analysis page automatically
+</p>
+</div>
+                            
+
                         </FastqDropZone>
 
                         {/* FASTQ Preview */}
-                        <div className="rounded border border-[#d6dbe0] bg-white p-4">
+                        {fastqPreview && 1==2 && <div className="rounded border border-[#d6dbe0] bg-white p-4">
                             <h4 className="mb-2 text-xs font-semibold text-slate-700">
                                 Detected FASTQ Files
                             </h4>
@@ -281,15 +254,15 @@ export default function StartUbuntu() {
                                 <TreeNodeNew
                                 node={fastqPreview}
                                 onTreeChange={(updatedTree) => {
-    //setTree(updatedTree)
-    console.log("FULL TREE:", updatedTree)
-  }}
+                                    //setTree(updatedTree)
+                                    console.log("FULL TREE:", updatedTree)
+                                }}
                                 />
 
                                 
                                 
                             </div>
-                        </div>
+                        </div>}
                         
 
                         {/* Selected Folder */}
@@ -333,15 +306,15 @@ export default function StartUbuntu() {
                         <div className="border-t border-[#dde2e7]" />
 
                         {/* Recent Projects */}
-                        <div>
-                            <h3 className="mb-2 text-xs font-semibold uppercase text-slate-700">
-                                Recent Projects
-                            </h3>
+<div>
+  <h3 className="mb-2 text-xs font-semibold uppercase text-slate-700">
+    Recent Projects
+  </h3>
 
-                            <ProjectsList mode="compact" />
-
-                            
-                        </div>
+  <div className="max-h-[260px] overflow-y-auto pr-1">
+    <ProjectsList mode="compact" />
+  </div>
+</div>
                     </aside>
 
                 </div>

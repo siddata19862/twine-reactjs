@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export function FastqDropZone({ onDrop }) {
+export function FastqDropZone({ onDrop, children }) {
   const [active, setActive] = useState(false)
   
   const handleClickSelect = async () => {
@@ -47,12 +47,13 @@ return;
           : "border-slate-300 bg-slate-50"}
       `}
     >
-      <p className="text-slate-600">
+      {children}
+      {/* <p className="text-slate-600">
         Drag & drop FASTQ files or folders here
       </p>
       <p className="mt-1 text-xs text-slate-400">
         Files are referenced, not copied
-      </p>
+      </p> */}
     </div>
   )
 }
