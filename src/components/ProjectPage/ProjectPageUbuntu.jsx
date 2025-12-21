@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import logo from "/logo.png"
+import { toast } from "sonner"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,7 @@ import HeaderBar from "../HeaderBar/HeaderBar"
 import { useTwineStore } from "../../store/useTwineStore"
 import HeaderBarProject from "../HeaderBar/HeaderBarProject"
 import PipelinePanel from "../pipelineStatus/PipelinePanel"
+import ReferenceCheckBanner from "../ReferenceCheckBanner/ReferenceCheckBanner"
 
 export default function ProjectPageUbuntu() {
   const [project, setProject] = useState(null)
@@ -50,17 +52,73 @@ export default function ProjectPageUbuntu() {
 
   const [sampleNames, setSampleNames] = useState({})
 
+  
+  // Check first
+  useEffect(()=>{
+    async function check()
+    {
+      const status = await window.electron.invoke("references:check")
+
+      if (!status.allPresent) {
+        // Download missing
+        
+        console.log("missing references",status);
+        //await window.electron.invoke("references:download")
+      }
+    }
+    check();
+    
+  });
+
+
+
   const handleExportCSV = async () => {
+  let expectedCount = twine.fastq?.files?.length ?? 0
+  expectedCount /= 2;
+
+  // 🔴 No samples at all
+  if (expectedCount === 0) {
+    toast.error("No samples found", {
+      description: "There are no samples to export",
+    })
+    return
+  }
+
+  // ✅ Count ONLY valid (non-empty) display names
+  const validCount = Object.values(sampleNames ?? {}).reduce(
+    (count, displayName) => {
+      const v = String(displayName ?? "").trim()
+      return v.length > 0 ? count + 1 : count
+    },
+    0
+  )
+
+  // 🔴 Mismatch → error
+  if (validCount !== expectedCount) {
+    toast.error("Missing sample mapping", {
+      description: `Only ${validCount} of ${expectedCount} sample names entered`,
+    })
+    return
+  }
+
+  // ✅ Build rows (safe now)
   const rows = Object.entries(sampleNames).map(
     ([sampleId, displayName]) => ({
       sample_id: sampleId,
-      display_name: displayName || ""
+      display_name: String(displayName).trim(),
     })
   )
 
-  await window.electron.invoke("samples:exportCSV", rows)
-}
+  const o = await window.electron.invoke("samples:exportCSV", rows)
 
+  if (o?.path) {
+    window.electron.invoke("twine:updateConfig",{"key":"csv","value":true});
+    window.electron.invoke("twine:updateConfig",{"key":"sampleNames","value":rows});
+    toast.message("CSV saved", {
+      description: "sample_mapping.csv added to project root",
+    })
+  }
+}
   
 
   const twine = useTwineStore((s) => s.twine)
@@ -269,6 +327,8 @@ export default function ProjectPageUbuntu() {
                   Add External FASTQ files
                 </Button>
 
+
+..{JSON.stringify(twine.config)}..
                 
 
                 <FastqDropZone
@@ -414,14 +474,25 @@ export default function ProjectPageUbuntu() {
           ))}
         </tbody>
       </table>
-      <div className="flex justify-end">
-  <button
+      <div className="flex justify-end mt-4 mb-4 me-4 ms-4">
+  <div className="flex items-center gap-3">
+  <Button
     onClick={handleExportCSV}
-    className="rounded-md bg-indigo-600 px-4 py-2 text-sm
-               font-medium text-white hover:bg-indigo-700"
+    variant="outline"
+    className="h-8 text-xs"
   >
     Generate & Save CSV
-  </button>
+  </Button>
+
+  <Button
+    disabled={!twine?.config?.csv}
+    onClick={handleExportCSV}
+    variant="outline"
+    className="h-8 text-xs"
+  >
+    Next
+  </Button>
+</div>
 </div>
     </div>
 
@@ -434,7 +505,11 @@ export default function ProjectPageUbuntu() {
             {/* -------- RUN -------- */}
             {activeStep === 3 && (
               <div className="space-y-4">
-                <Button onClick={()=>navigate("/newproject")}>Back</Button>
+
+
+              
+                <ReferenceCheckBanner />
+                
                 <Button onClick={runPipeline}>Start analysis</Button>
                 <Button onClick={()=>{window.electron.invoke("docker:logs","twine-"+twine?.projectId);}}>Logs</Button>
                 <LiveLogStream

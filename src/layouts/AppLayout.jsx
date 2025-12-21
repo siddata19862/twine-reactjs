@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/menubar"
 import MenuBar from "../components/menubar/MenuBar";
 
+import { Toaster } from "sonner"
+
 
 
 
@@ -24,8 +26,13 @@ export default function AppLayout() {
 
   return (
     <div className="app-layout">
-        
       
+        
+      <Toaster
+        position="bottom-center"
+        richColors
+        closeButton
+      />
 
       
       <div className="app-body">

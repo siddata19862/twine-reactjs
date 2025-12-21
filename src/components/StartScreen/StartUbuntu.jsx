@@ -58,13 +58,13 @@ export default function StartUbuntu() {
     },[selectedFastqs]);
 
     
-    useEffect(() => {
+    /*useEffect(() => {
     if (!twine) return
 
-    console.log("🧬 twine changed - Start Ubuntu", twine)
-    setFastqPreview(twine.project_structure)
+    //console.log("🧬 twine changed - Start Ubuntu", twine)
+    //setFastqPreview(twine.project_structure)
 
-    }, [twine])
+    }, [twine])*/
     
 
 
