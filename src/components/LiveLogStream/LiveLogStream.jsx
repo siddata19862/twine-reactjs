@@ -78,12 +78,7 @@ useEffect(() => {
             return (
               <motion.div
                 key={log.id}
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.22 }}
-                style={{ opacity }}
-                className="whitespace-pre-wrap leading-relaxed"
+                
               >
                 <LogLine log={log} />
               </motion.div>

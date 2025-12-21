@@ -7,8 +7,11 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar"
+import { useNavigate } from "react-router";
 
 export default function MenuBar() {
+
+    const navigate = useNavigate();
     return (<Menubar className="border-none shadow-none">
         <MenubarMenu>
             <MenubarTrigger>File</MenubarTrigger>

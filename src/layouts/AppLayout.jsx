@@ -27,7 +27,7 @@ export default function AppLayout() {
         
       
 
-      {/*<MenuBar />*/}
+      <MenuBar />
       <div className="app-body">
         
         <main className="content">

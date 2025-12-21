@@ -20,7 +20,16 @@ import LiveLogStream from "../LiveLogStream/LiveLogStream"
 export default function StartUbuntu() {
     const navigate = useNavigate()
 
-    
+    useEffect(() => {
+        window.pipeline.onLog((msg) => {
+        console.log("PIPELINE:", msg)
+        
+        })
+
+        window.pipeline.onEnd((msg) => {
+        console.log("PIPELINE END:", msg)
+        })
+    }, [])
 
     const runPipeline = async () => {
         const res = await window.pipeline.run()
