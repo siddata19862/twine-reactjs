@@ -38,11 +38,16 @@ import LiveLogStream from "../LiveLogStream/LiveLogStream"
 import { FastqDropZone } from "../DropZone/DropZone"
 import { useNavigate } from "react-router"
 import SystemMonitorNew from "../SystemMonitor/SystemMonitorNew"
+import HeaderBar from "../HeaderBar/HeaderBar"
+import { useTwineStore } from "../../store/useTwineStore"
 
 export default function ProjectPageUbuntu() {
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
+
+  const twine = useTwineStore((s) => s.twine)
+      console.log("twineee - Project Page",twine);
 
   const navigate = useNavigate()
 
@@ -147,12 +152,19 @@ export default function ProjectPageUbuntu() {
     setProject(updated)
   }
 
-  const runPipeline = async () => {
+  /*const runPipeline = async () => {
     const res = await window.pipeline.start()
     if (res?.ok === false) {
       alert("Docker daemon is not running.")
     }
-  }
+  }*/
+ const runPipeline = async () => {
+        const res = await window.pipeline.run()
+        console.log(res);
+        if (res.ok == false) {
+        alert("Docker Daemon is not running! Please start Docker first...");
+        }
+    }
 
   const steps = ["Files", "Configure", "Settings", "Run"]
 
@@ -177,24 +189,7 @@ export default function ProjectPageUbuntu() {
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-800">
       {/* ---------------- HEADER ---------------- */}
-      <header className="
-        flex items-center gap-4
-        border-b border-[#d6dbe0]
-        bg-[#fafafa]
-        px-6 py-4
-        shadow-sm
-      ">
-        <img src={logo} alt="Twine" className="h-10 w-28" />
-
-        <div>
-          <h1 className="text-sm font-semibold">
-            {project.name}
-          </h1>
-          <p className="text-xs text-slate-600">
-            Active Twine project
-          </p>
-        </div>
-      </header>
+      <HeaderBar />
 
       {/* ---------------- MAIN ---------------- */}
       <main className="mx-auto max-w-6xl px-6 py-6">

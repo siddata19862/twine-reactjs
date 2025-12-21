@@ -1,59 +1,10 @@
 import { useEffect, useState } from "react"
 import { useRollingHistory } from "./useRollingHistory"
 import LineGraph from "./LineGraph"
+import { useSystemStore } from "../../store/useSystemStore"
 
 /* =====================================================
-   Dummy systemStats (REMOVE later, replace with IPC)
-===================================================== */
-if (!window.systemStats) {
-  let interval
-  let cb
-
-  window.systemStats = {
-    start() {
-      interval = setInterval(() => {
-        const cores = Array.from({ length: 8 }).map(
-          () => Math.floor(20 + Math.random() * 70)
-        )
-
-        const avg = Math.round(
-          cores.reduce((a, b) => a + b, 0) / cores.length
-        )
-
-        cb?.({
-          cpu: {
-            cores,
-            avg, // 🔒 SINGLE SOURCE OF TRUTH
-          },
-          ram: {
-            used: 4200 + Math.floor(Math.random() * 800),
-            total: 8192,
-          },
-          disk: {
-            read: (Math.random() * 40).toFixed(1),
-            write: (Math.random() * 25).toFixed(1),
-          },
-          load: [
-            (Math.random() * 4).toFixed(2),
-            (Math.random() * 3).toFixed(2),
-            (Math.random() * 2).toFixed(2),
-          ],
-        })
-      }, 1000)
-    },
-
-    onUpdate(fn) {
-      cb = fn
-    },
-
-    stop() {
-      clearInterval(interval)
-    },
-  }
-}
-
-/* =====================================================
-   UI primitives
+   UI PRIMITIVES
 ===================================================== */
 
 function Bar({ value, color }) {
@@ -67,9 +18,13 @@ function Bar({ value, color }) {
   )
 }
 
-function CpuDial({ value }) {
-  const r = 22
-  const stroke = 4
+/* =====================================================
+   GENERIC USAGE DIAL
+===================================================== */
+
+function UsageDial({ value, size = 100 }) {
+  const stroke = size <= 60 ? 2 : 3
+  const r = size / 2 - stroke
   const c = 2 * Math.PI * r
   const offset = c - (value / 100) * c
 
@@ -81,18 +36,18 @@ function CpuDial({ value }) {
       : "#ef4444"
 
   return (
-    <svg width="64" height="64">
+    <svg width={size} height={size}>
       <circle
-        cx="32"
-        cy="32"
+        cx={size / 2}
+        cy={size / 2}
         r={r}
         stroke="#e5e7eb"
         strokeWidth={stroke}
         fill="none"
       />
       <circle
-        cx="32"
-        cy="32"
+        cx={size / 2}
+        cy={size / 2}
         r={r}
         stroke={color}
         strokeWidth={stroke}
@@ -100,14 +55,16 @@ function CpuDial({ value }) {
         strokeDasharray={c}
         strokeDashoffset={offset}
         strokeLinecap="round"
-        transform="rotate(-90 32 32)"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        className="transition-all duration-500"
       />
       <text
-        x="32"
-        y="36"
+        x="50%"
+        y="52%"
         textAnchor="middle"
-        fontSize="12"
-        className="fill-slate-700 font-medium"
+        dominantBaseline="middle"
+        fontSize={size <= 60 ? "10" : "14"}
+        className="fill-slate-700 font-semibold tabular-nums"
       >
         {value}%
       </text>
@@ -134,69 +91,92 @@ function MemoryBlocks({ percent }) {
 }
 
 /* =====================================================
+   HELPERS
+===================================================== */
+
+function formatUptime(seconds = 0) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  return `${h}h ${m}m`
+}
+
+/* =====================================================
    MAIN SYSTEM MONITOR
 ===================================================== */
 
 export default function SystemMonitorNew() {
-  const [stats, setStats] = useState(null)
+  const statsFromIPC = useSystemStore(s => s.stats)
+  const infoFromIPC  = useSystemStore(s => s.info)
+
+  
+  
+
   const history = useRollingHistory()
+  const [stats, setStats] = useState(null)
 
+  /* ---------- LIVE STATS ---------- */
   useEffect(() => {
-    /* -------------------------------------------
-       Register listener FIRST
-    ------------------------------------------- */
-    window.systemStats.onUpdate((data) => {
-      /* ---------------- CPU ---------------- */
+    if (!statsFromIPC) return
 
-      const cpuCores = data.cpu?.cores ?? []
+    const cpuTotal = statsFromIPC.cpu?.avg ?? 0
+    const cpuCores = statsFromIPC.cpu?.cores ?? []
 
-      const cpuTotal = Math.round(
-        Number(data.cpu?.avg) ||
-          (cpuCores.length
-            ? cpuCores.reduce((a, b) => a + b, 0) / cpuCores.length
-            : 0)
-      )
+    const ramUsed = statsFromIPC.ram?.used ?? 0
+    const ramTotal = statsFromIPC.ram?.total ?? 1
+    const ramPercent =
+      statsFromIPC.ram?.percent ??
+      Math.round((ramUsed / ramTotal) * 100)
 
-      /* ---------------- RAM ---------------- */
-
-      const ramUsed = data.ram?.used ?? 0
-      const ramTotal = data.ram?.total ?? 1
-      const ramPercent = Math.round((ramUsed / ramTotal) * 100)
-
-      setStats({
-        cpu: {
-          total: cpuTotal,
-          cores: cpuCores,
-        },
-        ram: {
-          used: ramUsed,
-          total: ramTotal,
-          percent: ramPercent,
-        },
-        disk: data.disk ?? { read: "0.0", write: "0.0" },
-        load: data.load ?? ["0.00", "0.00", "0.00"],
-      })
-
-      history.push(cpuTotal, ramPercent)
+    setStats({
+      cpu: { total: cpuTotal, cores: cpuCores },
+      ram: { used: ramUsed, total: ramTotal, percent: ramPercent },
+      disk: statsFromIPC.disk ?? { read: "0.0", write: "0.0" },
+      load: statsFromIPC.load ?? ["0.00", "0.00", "0.00"],
     })
 
-    /* -------------------------------------------
-       THEN start polling
-    ------------------------------------------- */
-    window.systemStats.start()
-
-    return () => window.systemStats.stop()
-  }, [])
+    history.push(cpuTotal, ramPercent)
+  }, [statsFromIPC])
 
   if (!stats) return null
+
+  const info = infoFromIPC ?? {}
 
   return (
     <div className="space-y-5 text-xs text-slate-700">
 
       {/* ================= CPU ================= */}
       <div className="space-y-2">
+
+
+        {/* ================= SYSTEM INFO (STATIC) ================= */}
+      {info && (
+        <div className="border-t pt-2 text-[10px] text-slate-500 grid grid-cols-2 gap-x-6 gap-y-1">
+          <div>OS: <span className="text-slate-700">{info.os.platform}</span></div>
+          <div>Arch: <span className="text-slate-700">{info.os.arch}</span></div>
+
+          <div className="col-span-2 truncate">
+            CPU: <span className="text-slate-700">{info.cpu.model} ({info.cpu.speedMHz}MHz)</span>
+          </div>
+
+          <div>Cores: <span className="text-slate-700">{info.cpu.cores}</span></div>
+          <div>
+            Uptime:{" "}
+            <span className="text-slate-700">
+              {formatUptime(info.os.uptime)}
+            </span>
+          </div>
+
+          <div className="col-span-2">
+            Memory:{" "}
+            <span className="text-slate-700">
+              {info.memory.totalMB} MB
+            </span>
+          </div>
+        </div>
+      )}
         <div className="flex gap-4 items-start">
-          <CpuDial value={stats.cpu.total} />
+          
+          <UsageDial value={stats.cpu.total} size={100} />
 
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -210,26 +190,33 @@ export default function SystemMonitorNew() {
               </span>
             </div>
 
-            {/* Per-core */}
-            <div className="space-y-0.5">
-              {stats.cpu.cores.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-10 text-[10px] text-slate-400">
-                    C{i}
-                  </span>
-                  <Bar value={c} color="bg-slate-400" />
-                  <span className="w-8 text-right text-[10px] tabular-nums">
-                    {c}%
-                  </span>
-                </div>
-              ))}
-            </div>
+            {stats.cpu.cores.map((c, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="w-10 text-[10px] text-slate-400">
+                  C{i}
+                </span>
+                <Bar value={c} color="bg-slate-400" />
+                <span className="w-8 text-right text-[10px] tabular-nums">
+                  {c}%
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* CPU TIMELINE */}
         <div className="pl-[76px]">
           <LineGraph data={history.cpu} color="#6366f1" />
+        </div>
+
+        {/* RAM MINI DIAL */}
+        <div className="pl-[76px] flex items-center gap-3 pt-2">
+          <UsageDial value={stats.ram.percent} size={52} />
+          <div className="text-[10px] text-slate-500">
+            <div className="font-medium text-slate-600">RAM</div>
+            <div className="tabular-nums">
+              {stats.ram.used} / {stats.ram.total} MB
+            </div>
+          </div>
         </div>
       </div>
 
@@ -249,8 +236,10 @@ export default function SystemMonitorNew() {
         <LineGraph data={history.ram} color="#10b981" />
       </div>
 
+      
+
       {/* ================= EXTRAS ================= */}
-      <div className="flex justify-between text-[10px] text-slate-500 pt-1">
+      <div className="flex justify-between text-[10px] text-slate-500">
         <span>Disk ↑ {stats.disk.read} MB/s</span>
         <span>↓ {stats.disk.write} MB/s</span>
         <span>Load {stats.load.join(" / ")}</span>

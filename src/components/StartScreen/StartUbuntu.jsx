@@ -15,6 +15,8 @@ import TreeNode from "../TreeNode/TreeNode"
 import { useTwineStore } from "../../store/useTwineStore"
 import TreeNodeNew from "../TreeNode/TreeNodeNew"
 import LiveLogStream from "../LiveLogStream/LiveLogStream"
+import ProjectsList from "../projects/ProjectsList"
+import { useProjectRegistryStore } from "../../store/useProjectRegistry"
 
 
 export default function StartUbuntu() {
@@ -169,7 +171,7 @@ export default function StartUbuntu() {
             {/* ---------------- Main Split View ---------------- */}
             <main className="mx-auto max-w-6xl px-6 py-6">
 
-
+<ProjectsList />
 <LiveLogStream
                     subscribe={(cb) => {
                       window.pipeline.onLog(cb)
@@ -222,9 +224,7 @@ export default function StartUbuntu() {
                                 New
                             </Button>
 
-                            <Button onClick={() => window.electronAPI.generateScripts()}>
-                                Generate Scripts
-                            </Button>
+                            
                         </div>
                         <Button className="mt-2" onClick={runPipeline}>
                     Start analysis
@@ -238,6 +238,7 @@ export default function StartUbuntu() {
                                     console.log("paths",paths);
                                     
                                     await window.api.collectAndCreate(paths)
+                                    useProjectRegistryStore.getState().refresh()
                                     //navigate("/project")
                                 } catch (err) {
                                     const ok = window.confirm(
