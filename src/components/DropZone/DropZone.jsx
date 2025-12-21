@@ -2,9 +2,18 @@ import { useState } from "react"
 
 export function FastqDropZone({ onDrop }) {
   const [active, setActive] = useState(false)
+  
+  const handleClickSelect = async () => {
+    
+  const folder = await window.api.selectFolder()
+  if (!folder) return
 
+  onDrop([folder])
+}
+  
   return (
     <div
+    onClick={handleClickSelect}
       onDragOver={(e) => {
         e.preventDefault()
         e.stopPropagation()

@@ -15,8 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { FastqDropZone } from "../DropZone/DropZone"
+import FilesPreviewer from "../FilesPreviewer/FilesPreviewer"
+import { useTwineStore } from "../../store/useTwineStore"
 
 export default function NewProjectUbuntu() {
+
+  const twine = useTwineStore((s) => s.twine)
+      console.log("twineee2",twine);
+
   const navigate = useNavigate()
 
   const [projectName, setProjectName] = useState("")
@@ -31,14 +38,14 @@ export default function NewProjectUbuntu() {
   }
 
   const handleCreate = async () => {
-    if (!projectName || !projectDir) return
+    if (!twine?.name || !twine?.projectDir) return
 
-    await window.projectApi.create({
+    /* await window.projectApi.create({
       name: projectName.trim(),
       path: projectDir,
       technology,
       analysisType,
-    })
+    }) */
 
     navigate("/project")
   }
@@ -108,8 +115,8 @@ export default function NewProjectUbuntu() {
             <div className="space-y-1">
               <Label className="text-xs">Project name</Label>
               <Input
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
+                value={twine?.name ?? ""}
+                onChange={()=>{}}
                 placeholder="e.g. Gut_16S_Run_01"
                 className="h-8 text-xs"
               />
@@ -117,12 +124,12 @@ export default function NewProjectUbuntu() {
 
             {/* Output Directory */}
             <div className="space-y-1">
-              <Label className="text-xs">Output folder</Label>
+              <Label className="text-xs">Project Folder</Label>
 
               <div className="flex gap-2">
                 <Input
                   readOnly
-                  value={projectDir || ""}
+                  value={twine?.projectDir || ""}
                   placeholder="Select an existing directory"
                   className="h-8 text-xs bg-slate-50 cursor-pointer"
                   onClick={chooseDirectory}
@@ -139,8 +146,8 @@ export default function NewProjectUbuntu() {
               </div>
 
               <p className="text-[11px] text-slate-500">
-                Directory should be empty. Twine will create all outputs here.
-              </p>
+  All analysis outputs and generated result files will be written to the same directory as your input FASTQ files. You may choose a different output directory if preferred.
+</p>
             </div>
 
             {/* Technology */}
@@ -153,14 +160,16 @@ export default function NewProjectUbuntu() {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="illumina">Illumina</SelectItem>
-                  <SelectItem value="pacbio">PacBio</SelectItem>
+                  
+                  <SelectItem value="pacbio" disabled>PacBio</SelectItem>
                   <SelectItem value="nanopore" disabled>
                     Nanopore
                   </SelectItem>
+                  <SelectItem value="illumina">Illumina (Default)</SelectItem>
                   <SelectItem value="mgi" disabled>
                     MGI
                   </SelectItem>
+                  
                 </SelectContent>
               </Select>
             </div>
@@ -175,9 +184,9 @@ export default function NewProjectUbuntu() {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="rna">RNA-Seq</SelectItem>
-                  <SelectItem value="mrna">mRNA-Seq</SelectItem>
-                  <SelectItem value="wes">Whole Exome (WES)</SelectItem>
+                  <SelectItem value="rna" disabled>RNA-Seq</SelectItem>
+                  <SelectItem value="mrna">16S rRNA Amplicon-sequencing</SelectItem>
+                  <SelectItem value="wes" disabled>Whole Exome (WES)</SelectItem>
                   <SelectItem value="wgs-30x" disabled>
                     WGS (Parabricks)
                   </SelectItem>
@@ -197,7 +206,7 @@ export default function NewProjectUbuntu() {
 
               <Button
                 onClick={handleCreate}
-                disabled={!projectName || !projectDir}
+                disabled={!twine?.name || !twine?.projectDir}
                 className="
                   h-8 px-4 text-xs
                   border border-[#c9cfd6]
@@ -228,6 +237,12 @@ export default function NewProjectUbuntu() {
             <div className="border-t border-[#dde2e7] pt-4 text-[11px] text-slate-500">
               Tip: Drop a FASTQ folder on the start screen to auto-create projects.
             </div>
+
+
+
+            {/* Drop Zone */}
+                                    <FilesPreviewer />
+
           </aside>
         </div>
 

@@ -313,6 +313,7 @@ export default function ProjectPageUbuntu() {
             {/* -------- RUN -------- */}
             {activeStep === 3 && (
               <div className="space-y-4">
+                <Button onClick={()=>navigate("/newproject")}>Back</Button>
                 <Button onClick={runPipeline}>Start analysis</Button>
                 <LiveLogStream
                   subscribe={(cb) => {

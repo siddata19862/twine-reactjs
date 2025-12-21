@@ -12,14 +12,18 @@ if (!window.systemStats) {
   window.systemStats = {
     start() {
       interval = setInterval(() => {
-        const cpuTotal = Math.floor(30 + Math.random() * 60)
+        const cores = Array.from({ length: 8 }).map(
+          () => Math.floor(20 + Math.random() * 70)
+        )
+
+        const avg = Math.round(
+          cores.reduce((a, b) => a + b, 0) / cores.length
+        )
 
         cb?.({
           cpu: {
-            total: cpuTotal,
-            cores: Array.from({ length: 8 }).map(
-              () => Math.floor(20 + Math.random() * 70)
-            ),
+            cores,
+            avg, // 🔒 SINGLE SOURCE OF TRUTH
           },
           ram: {
             used: 4200 + Math.floor(Math.random() * 800),
@@ -138,116 +142,114 @@ export default function SystemMonitorNew() {
   const history = useRollingHistory()
 
   useEffect(() => {
-    window.systemStats.start()
-
+    /* -------------------------------------------
+       Register listener FIRST
+    ------------------------------------------- */
     window.systemStats.onUpdate((data) => {
-  // 1️⃣ Resolve total CPU %
-  const cpuTotal =
-    typeof data.cpu === "number"
-      ? data.cpu
-      : data.cpu?.total ?? 0
+      /* ---------------- CPU ---------------- */
 
-  // 2️⃣ Resolve per-core
-  let cpuCores = []
+      const cpuCores = data.cpu?.cores ?? []
 
-  if (Array.isArray(data.cpu?.cores)) {
-    // Real per-core data (future)
-    cpuCores = data.cpu.cores
-  } else {
-    // FAKE cores for now (based on logical CPU count)
-    const logicalCores = navigator.hardwareConcurrency || 8
-
-    cpuCores = Array.from({ length: logicalCores }).map(() => {
-      // Slight jitter around total so it looks real
-      const variance = Math.random() * 12 - 6
-      return Math.max(
-        0,
-        Math.min(100, Math.round(cpuTotal + variance))
+      const cpuTotal = Math.round(
+        Number(data.cpu?.avg) ||
+          (cpuCores.length
+            ? cpuCores.reduce((a, b) => a + b, 0) / cpuCores.length
+            : 0)
       )
+
+      /* ---------------- RAM ---------------- */
+
+      const ramUsed = data.ram?.used ?? 0
+      const ramTotal = data.ram?.total ?? 1
+      const ramPercent = Math.round((ramUsed / ramTotal) * 100)
+
+      setStats({
+        cpu: {
+          total: cpuTotal,
+          cores: cpuCores,
+        },
+        ram: {
+          used: ramUsed,
+          total: ramTotal,
+          percent: ramPercent,
+        },
+        disk: data.disk ?? { read: "0.0", write: "0.0" },
+        load: data.load ?? ["0.00", "0.00", "0.00"],
+      })
+
+      history.push(cpuTotal, ramPercent)
     })
-  }
 
-  // 3️⃣ RAM
-  const ramUsed = data.ram?.used ?? 0
-  const ramTotal = data.ram?.total ?? 1
-
-  setStats({
-    cpu: {
-      total: cpuTotal,
-      cores: cpuCores,
-    },
-    ram: {
-      used: ramUsed,
-      total: ramTotal,
-    },
-    disk: data.disk ?? { read: "0.0", write: "0.0" },
-    load: data.load ?? ["0.00", "0.00", "0.00"],
-  })
-
-  history.push(
-    cpuTotal,
-    Math.round((ramUsed / ramTotal) * 100)
-  )
-})
+    /* -------------------------------------------
+       THEN start polling
+    ------------------------------------------- */
+    window.systemStats.start()
 
     return () => window.systemStats.stop()
   }, [])
 
   if (!stats) return null
 
-  const ramPercent = Math.round(
-    (stats.ram.used / stats.ram.total) * 100
-  )
-
   return (
-    <div className="space-y-4 text-xs text-slate-700">
+    <div className="space-y-5 text-xs text-slate-700">
 
-      {/* CPU */}
-      <div className="flex gap-4 items-center">
-        <CpuDial value={stats.cpu.total} />
+      {/* ================= CPU ================= */}
+      <div className="space-y-2">
+        <div className="flex gap-4 items-start">
+          <CpuDial value={stats.cpu.total} />
 
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-10 font-medium">CPU</span>
-            <Bar
-              value={stats.cpu.total}
-              color="bg-gradient-to-r from-blue-500 to-purple-500"
-            />
-            <span className="w-10 text-right tabular-nums">
-              {stats.cpu.total}%
-            </span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-10 font-medium">CPU</span>
+              <Bar
+                value={stats.cpu.total}
+                color="bg-gradient-to-r from-blue-500 to-purple-500"
+              />
+              <span className="w-10 text-right tabular-nums">
+                {stats.cpu.total}%
+              </span>
+            </div>
+
+            {/* Per-core */}
+            <div className="space-y-0.5">
+              {stats.cpu.cores.map((c, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="w-10 text-[10px] text-slate-400">
+                    C{i}
+                  </span>
+                  <Bar value={c} color="bg-slate-400" />
+                  <span className="w-8 text-right text-[10px] tabular-nums">
+                    {c}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
 
-          {/* Per-core */}
-          <div className="space-y-0.5">
-            {stats.cpu.cores.map((c, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="w-10 text-[10px] text-slate-400">
-                  C{i}
-                </span>
-                <Bar value={c} color="bg-slate-400" />
-              </div>
-            ))}
-          </div>
+        {/* CPU TIMELINE */}
+        <div className="pl-[76px]">
+          <LineGraph data={history.cpu} color="#6366f1" />
         </div>
       </div>
 
-      <LineGraph data={history.cpu} color="#6366f1" />
-
-      {/* RAM */}
-      <div className="space-y-1">
+      {/* ================= RAM ================= */}
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
           <span className="w-10 font-medium">RAM</span>
-          <MemoryBlocks percent={ramPercent} />
+          <MemoryBlocks percent={stats.ram.percent} />
           <span className="ml-auto tabular-nums">
             {stats.ram.used} / {stats.ram.total} MB
+            <span className="ml-2 text-slate-500">
+              ({stats.ram.percent}%)
+            </span>
           </span>
         </div>
+
+        <LineGraph data={history.ram} color="#10b981" />
       </div>
 
-      <LineGraph data={history.ram} color="#10b981" />
-
-      {/* Extras (dummy) */}
+      {/* ================= EXTRAS ================= */}
       <div className="flex justify-between text-[10px] text-slate-500 pt-1">
         <span>Disk ↑ {stats.disk.read} MB/s</span>
         <span>↓ {stats.disk.write} MB/s</span>

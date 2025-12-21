@@ -19,6 +19,12 @@ import LiveLogStream from "../LiveLogStream/LiveLogStream"
 
 export default function StartUbuntu() {
     const navigate = useNavigate()
+    const handleClickSelect = async () => {
+  const folder = await window.api.selectFolder()
+  if (!folder) return
+
+  onDrop([folder])
+}
 
     useEffect(() => {
         window.pipeline.onLog((msg) => {
@@ -226,8 +232,11 @@ export default function StartUbuntu() {
 
                         {/* Drop Zone */}
                         <FastqDropZone
+                            
                             onDrop={async (paths) => {
                                 try {
+                                    console.log("paths",paths);
+                                    
                                     await window.api.collectAndCreate(paths)
                                     //navigate("/project")
                                 } catch (err) {
@@ -241,12 +250,12 @@ export default function StartUbuntu() {
                                 }
                             }}
                             className="
-                border border-dashed border-[#9ec5ad]
-                bg-[#f3faf6]
-                p-10
-                text-center
-                hover:bg-[#eaf6ef]
-              "
+                                border border-dashed border-[#9ec5ad]
+                                bg-[#f3faf6]
+                                p-10
+                                text-center
+                                hover:bg-[#eaf6ef]
+                            "
                         >
                             <FolderOpen className="mx-auto h-10 w-10 text-[#4f8f6b]" />
 
