@@ -48,6 +48,19 @@ export default function ProjectPageUbuntu() {
   const [loading, setLoading] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
 
+  const [sampleNames, setSampleNames] = useState({})
+
+  const handleExportCSV = async () => {
+  const rows = Object.entries(sampleNames).map(
+    ([sampleId, displayName]) => ({
+      sample_id: sampleId,
+      display_name: displayName || ""
+    })
+  )
+
+  await window.electron.invoke("samples:exportCSV", rows)
+}
+
   
 
   const twine = useTwineStore((s) => s.twine)
@@ -65,7 +78,7 @@ export default function ProjectPageUbuntu() {
 
   /* ---------------- FASTQ grouping ---------------- */
   function groupFastqBySample(files = []) {
-    console.log("grouping",files);
+    //console.log("grouping",files);
     const groups = {}
 
     files.forEach((file) => {
@@ -79,7 +92,7 @@ export default function ProjectPageUbuntu() {
       if (!groups[sample]) groups[sample] = { R1: null, R2: null }
       groups[sample][read] = file
     })
-    console.log("returniing",groups);
+    //console.log("returniing",groups);
 
     return groups
   }
@@ -382,11 +395,18 @@ export default function ProjectPageUbuntu() {
               {/* Display name */}
               <td className="px-4 py-3 align-top">
                 <input
-                  type="text"
-                  placeholder="e.g. Stool – Subject A"
-                  className="w-full rounded-md border px-3 py-1.5 text-sm
-                             focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                />
+  type="text"
+  placeholder="e.g. Stool – Subject A"
+  value={sampleNames[sample] ?? ""}
+  onChange={(e) =>
+    setSampleNames(prev => ({
+      ...prev,
+      [sample]: e.target.value
+    }))
+  }
+  className="w-full rounded-md border px-3 py-1.5 text-sm
+             focus:outline-none focus:ring-2 focus:ring-indigo-200"
+/>
               </td>
 
               
@@ -394,6 +414,15 @@ export default function ProjectPageUbuntu() {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end">
+  <button
+    onClick={handleExportCSV}
+    className="rounded-md bg-indigo-600 px-4 py-2 text-sm
+               font-medium text-white hover:bg-indigo-700"
+  >
+    Generate & Save CSV
+  </button>
+</div>
     </div>
 
     <p className="text-xs text-slate-400">
