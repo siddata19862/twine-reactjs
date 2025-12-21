@@ -52,85 +52,84 @@ export default function ProjectPageUbuntu() {
 
   const [sampleNames, setSampleNames] = useState({})
 
-  
+
   // Check first
-  useEffect(()=>{
-    async function check()
-    {
+  useEffect(() => {
+    async function check() {
       const status = await window.electron.invoke("references:check")
 
       if (!status.allPresent) {
         // Download missing
-        
-        console.log("missing references",status);
+
+        console.log("missing references", status);
         //await window.electron.invoke("references:download")
       }
     }
     check();
-    
+
   });
 
 
 
   const handleExportCSV = async () => {
-  let expectedCount = twine.fastq?.files?.length ?? 0
-  expectedCount /= 2;
+    let expectedCount = twine.fastq?.files?.length ?? 0
+    expectedCount /= 2;
 
-  // 🔴 No samples at all
-  if (expectedCount === 0) {
-    toast.error("No samples found", {
-      description: "There are no samples to export",
-    })
-    return
+    // 🔴 No samples at all
+    if (expectedCount === 0) {
+      toast.error("No samples found", {
+        description: "There are no samples to export",
+      })
+      return
+    }
+
+    // ✅ Count ONLY valid (non-empty) display names
+    const validCount = Object.values(sampleNames ?? {}).reduce(
+      (count, displayName) => {
+        const v = String(displayName ?? "").trim()
+        return v.length > 0 ? count + 1 : count
+      },
+      0
+    )
+
+    // 🔴 Mismatch → error
+    if (validCount !== expectedCount) {
+      toast.error("Missing sample mapping", {
+        description: `Only ${validCount} of ${expectedCount} sample names entered`,
+      })
+      return
+    }
+
+    // ✅ Build rows (safe now)
+    const rows = Object.entries(sampleNames).map(
+      ([sampleId, displayName]) => ({
+        sample_id: sampleId,
+        display_name: String(displayName).trim(),
+      })
+    )
+
+    const o = await window.electron.invoke("samples:exportCSV", rows)
+
+    if (o?.path) {
+      window.electron.invoke("twine:updateConfig", { "key": "csv", "value": true });
+      window.electron.invoke("twine:updateConfig", { "key": "sampleNames", "value": rows });
+      toast.message("CSV saved", {
+        description: "sample_mapping.csv added to project root",
+      })
+    }
   }
 
-  // ✅ Count ONLY valid (non-empty) display names
-  const validCount = Object.values(sampleNames ?? {}).reduce(
-    (count, displayName) => {
-      const v = String(displayName ?? "").trim()
-      return v.length > 0 ? count + 1 : count
-    },
-    0
-  )
-
-  // 🔴 Mismatch → error
-  if (validCount !== expectedCount) {
-    toast.error("Missing sample mapping", {
-      description: `Only ${validCount} of ${expectedCount} sample names entered`,
-    })
-    return
-  }
-
-  // ✅ Build rows (safe now)
-  const rows = Object.entries(sampleNames).map(
-    ([sampleId, displayName]) => ({
-      sample_id: sampleId,
-      display_name: String(displayName).trim(),
-    })
-  )
-
-  const o = await window.electron.invoke("samples:exportCSV", rows)
-
-  if (o?.path) {
-    window.electron.invoke("twine:updateConfig",{"key":"csv","value":true});
-    window.electron.invoke("twine:updateConfig",{"key":"sampleNames","value":rows});
-    toast.message("CSV saved", {
-      description: "sample_mapping.csv added to project root",
-    })
-  }
-}
-  
 
   const twine = useTwineStore((s) => s.twine)
-      //console.log("twineee - Project Page",twine);
+  //console.log("twineee - Project Page",twine);
 
-  useEffect(()=>{
+  useEffect(() => {
     //console.log("mytwine",twine);
-    if(!twine) return;
-    console.log("dockerlog","twine-"+twine?.projectId);
-    console.log("twine",twine);
+    if (!twine) return;
+    console.log("dockerlog", "twine-" + twine?.projectId);
+    console.log("twine", twine);
     //window.electron.invoke("docker:logs","twine-"+twine?.projectId);
-  },[twine]);
+  }, [twine]);
 
   const navigate = useNavigate()
 
@@ -156,7 +155,7 @@ export default function ProjectPageUbuntu() {
   }
 
   const groupedFastq = useMemo(
-    
+
     () => groupFastqBySample(twine?.fastq?.files || []),
     [twine?.fastq?.files]
   )
@@ -244,23 +243,23 @@ export default function ProjectPageUbuntu() {
       console.log("m",m);
     });
   }); */
-  
-  
+
+
   /*const runPipeline = async () => {
     const res = await window.pipeline.start()
     if (res?.ok === false) {
       alert("Docker daemon is not running.")
     }
   }*/
- const runPipeline = async () => {
-        const res = await window.pipeline.run()
-        console.log(res);
-        if (res.ok == false) {
-        alert("Docker Daemon is not running! Please start Docker first...");
-        }
+  const runPipeline = async () => {
+    const res = await window.pipeline.run()
+    console.log(res);
+    if (res.ok == false) {
+      alert("Docker Daemon is not running! Please start Docker first...");
     }
+  }
 
-  const steps = ["Files", "Configure", "Settings", "Run","Output"]
+  const steps = ["Files", "Settings", "Configure", "Run", "Output"]
 
   /* ---------------- guards ---------------- */
   if (loading || !twine) {
@@ -328,8 +327,8 @@ export default function ProjectPageUbuntu() {
                 </Button>
 
 
-..{JSON.stringify(twine.config)}..
-                
+
+
 
                 <FastqDropZone
                   onDrop={async (paths) => {
@@ -337,13 +336,13 @@ export default function ProjectPageUbuntu() {
                     const updated = await window.projectApi.addFastq(files)
                     setProject(updated)
                   }}>
-                    <p className="text-slate-600">
-        Drag individual FASTQ files here (Not Folders) that are not in the current directory
-      </p>
-      <p className="mt-1 text-xs text-slate-400">
-        Files are referenced, not copied
-      </p>
-                  </FastqDropZone>
+                  <p className="text-slate-600">
+                    Drag individual FASTQ files here (Not Folders) that are not in the current directory
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Files are referenced, not copied
+                  </p>
+                </FastqDropZone>
 
 
                 {Object.entries(groupedFastq).map(([sample, reads]) => {
@@ -390,114 +389,286 @@ export default function ProjectPageUbuntu() {
               </div>
             )}
 
-            {/* -------- CONFIG -------- */}
+            
+
+
+
             {activeStep === 1 && (
-              <div className="grid grid-cols-2 gap-4">
-                <PipelineCard
-                  step={1}
-                  title="QC"
-                  value={pipelineConfig.qc}
-                  options={[{ label: "FastQC", value: "fastqc" }]}
-                  onChange={(v) => updatePipeline("qc", v)}
-                />
-                <PipelineCard
-                  step={2}
-                  title="Trimming"
-                  value={pipelineConfig.trimming}
-                  options={[{ label: "fastp", value: "fastp" }]}
-                  onChange={(v) => updatePipeline("trimming", v)}
-                />
+              <div className="space-y-6">
+                <h3 className="text-sm font-medium text-slate-700">
+                  Sample settings
+                </h3>
+
+                <p className="text-sm text-slate-500">
+                  Assign friendly names to samples. These names will appear in
+                  statistics, charts, and reports.
+                </p>
+
+                <div className="overflow-hidden rounded-lg border bg-white">
+                  <table className="w-full border-collapse text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                      <tr className="border-b">
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Sample ID
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Display name (Group)
+                        </th>
+
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y">
+                      {Object.entries(
+                        groupFastqBySample(twine.fastq?.files || [])
+                      ).map(([sample, reads]) => (
+                        <tr
+                          key={sample}
+                          className="hover:bg-slate-50 transition"
+                        >
+                          {/* Sample ID */}
+                          <td className="px-4 py-3 align-top">
+                            <p className="font-mono text-xs text-slate-800 break-all">
+                              {sample}
+                            </p>
+                          </td>
+
+                          {/* Display name */}
+                          <td className="px-4 py-3 align-top">
+                            <input
+                              type="text"
+                              placeholder="e.g. Stool – Subject A"
+                              value={sampleNames[sample] ?? ""}
+                              onChange={(e) =>
+                                setSampleNames(prev => ({
+                                  ...prev,
+                                  [sample]: e.target.value
+                                }))
+                              }
+                              className="w-full rounded-md border px-3 py-1.5 text-sm
+             focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            />
+                          </td>
+
+
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="flex justify-end mt-4 mb-4 me-4 ms-4">
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={handleExportCSV}
+                        variant="outline"
+                        className="h-8 text-xs"
+                      >
+                        Generate & Save CSV
+                      </Button>
+
+                      <Button
+                        disabled={!twine?.config?.csv}
+                        onClick={handleExportCSV}
+                        variant="outline"
+                        className="h-8 text-xs"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-400">
+                  Sample IDs are derived from filenames and cannot be changed.
+                </p>
               </div>
             )}
 
 
 
-            {activeStep === 2 && (
-  <div className="space-y-6">
+            {/* -------- CONFIG -------- */}
+{/* STEP 2 — CONFIGURE */}
+{activeStep === 2 && (
+  <div className="space-y-8">
     <h3 className="text-sm font-medium text-slate-700">
-      Sample settings
+      Configure pipeline
     </h3>
 
-    <p className="text-sm text-slate-500">
-      Assign friendly names to samples. These names will appear in
-      statistics, charts, and reports.
-    </p>
+    {/* TOOL SELECTION */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-    <div className="overflow-hidden rounded-lg border bg-white">
-      <table className="w-full border-collapse text-sm">
-        <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-          <tr className="border-b">
-            <th className="px-4 py-3 text-left font-semibold">
-              Sample ID
-            </th>
-            <th className="px-4 py-3 text-left font-semibold">
-              Display name (Group)
-            </th>
-            
-          </tr>
-        </thead>
+      {/* STEP 1 — Raw QC */}
+      <PipelineCard
+        step={1}
+        title="Raw Read QC"
+        value={pipelineConfig.qc}
+        options={[
+          { label: "FastQC (Recommended)", value: "fastqc" },
+          { label: "MultiQC", value: "multiqc" },
+        ]}
+        onChange={(v) => updatePipeline("qc", v)}
+      />
 
-        <tbody className="divide-y">
-          {Object.entries(
-            groupFastqBySample(twine.fastq?.files || [])
-          ).map(([sample, reads]) => (
-            <tr
-              key={sample}
-              className="hover:bg-slate-50 transition"
-            >
-              {/* Sample ID */}
-              <td className="px-4 py-3 align-top">
-                <p className="font-mono text-xs text-slate-800 break-all">
-                  {sample}
-                </p>
-              </td>
+      {/* STEP 2 — Trimming */}
+      <PipelineCard
+        step={2}
+        title="Pre-processing (Trimming)"
+        value={pipelineConfig.trimming}
+        options={[
+          { label: "fastp (Recommended)", value: "fastp" },
+          { label: "Trimmomatic", value: "trimmomatic" },
+        ]}
+        onChange={(v) => updatePipeline("trimming", v)}
+      />
 
-              {/* Display name */}
-              <td className="px-4 py-3 align-top">
-                <input
-  type="text"
-  placeholder="e.g. Stool – Subject A"
-  value={sampleNames[sample] ?? ""}
-  onChange={(e) =>
-    setSampleNames(prev => ({
-      ...prev,
-      [sample]: e.target.value
-    }))
-  }
-  className="w-full rounded-md border px-3 py-1.5 text-sm
-             focus:outline-none focus:ring-2 focus:ring-indigo-200"
-/>
-              </td>
+      {/* STEP 3 — Denoising */}
+      <PipelineCard
+        step={3}
+        title="Denoising"
+        
+        options={[
+          { label: "DADA2 (Recommended)", value: "dada2" },
+          { label: "QIIME2 (Coming soon)", value: "qiime2" },
+        ]}
+        onChange={(v) => updatePipeline("denoising", v)}
+      />
+    </div>
 
-              
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="flex justify-end mt-4 mb-4 me-4 ms-4">
-  <div className="flex items-center gap-3">
-  <Button
-    onClick={handleExportCSV}
-    variant="outline"
-    className="h-8 text-xs"
-  >
-    Generate & Save CSV
-  </Button>
+    {/* TAXONOMY */}
+    <div className="rounded-lg border bg-white p-4 space-y-4">
+      <div>
+        <p className="text-sm font-medium text-slate-700">
+          Taxonomy Assignment
+        </p>
+        <p className="text-xs text-slate-500">
+          Choose taxonomy method and reference database
+        </p>
+      </div>
 
-  <Button
-    disabled={!twine?.config?.csv}
-    onClick={handleExportCSV}
-    variant="outline"
-    className="h-8 text-xs"
-  >
-    Next
-  </Button>
-</div>
-</div>
+      {/* Method */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Method
+        </p>
+
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              checked={pipelineConfig.taxonomy?.engine === "dada2"}
+              onChange={() =>
+                updatePipeline("taxonomy", {
+                  ...pipelineConfig.taxonomy,
+                  engine: "dada2",
+                })
+              }
+            />
+            DADA2 (Default)
+          </label>
+
+          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-not-allowed">
+            <input type="radio" disabled />
+            QIIME2 (Coming soon)
+          </label>
+        </div>
+      </div>
+
+      {/* Reference */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Reference Database
+        </p>
+
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              checked={pipelineConfig.taxonomy?.database === "silva_v138"}
+              onChange={() =>
+                updatePipeline("taxonomy", {
+                  ...pipelineConfig.taxonomy,
+                  database: "silva_v138",
+                })
+              }
+            />
+            SILVA v138 (Recommended)
+          </label>
+
+          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-not-allowed">
+            <input type="radio" disabled />
+            Greengenes2 (Coming soon)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    {/* VISUALIZATIONS */}
+    <div className="rounded-lg border bg-white p-4 space-y-4">
+      <div>
+        <p className="text-sm font-medium text-slate-700">
+          Visualizations
+        </p>
+        <p className="text-xs text-slate-500">
+          Select which plots and reports to generate
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {[
+          { key: "alpha_diversity", label: "Alpha Diversity" },
+          { key: "alpha_rarefaction", label: "Alpha Rarefaction" },
+          { key: "beta_diversity", label: "Beta Diversity" },
+          { key: "taxonomy_barplots", label: "Taxonomy Barplots" },
+        ].map(v => (
+          <label
+            key={v.key}
+            className="flex items-center gap-2 text-sm"
+          >
+            <input
+              type="checkbox"
+              checked={pipelineConfig.visualizations?.[v.key] ?? true}
+              onChange={(e) =>
+                updatePipeline("visualizations", {
+                  ...pipelineConfig.visualizations,
+                  [v.key]: e.target.checked,
+                })
+              }
+            />
+            {v.label}
+          </label>
+        ))}
+      </div>
+    </div>
+
+    {/* PERFORMANCE */}
+    <div className="rounded-lg border bg-white p-4 space-y-3">
+      <div>
+        <p className="text-sm font-medium text-slate-700">
+          Performance
+        </p>
+        <p className="text-xs text-slate-500">
+          Controls compute usage during pipeline execution
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <label className="text-sm text-slate-600">
+          Threads
+        </label>
+        <input
+          type="number"
+          min={1}
+          className="w-20 rounded border px-2 py-1 text-sm"
+          value={pipelineConfig.threads ?? 10}
+          onChange={(e) =>
+            updatePipeline("threads", Number(e.target.value))
+          }
+        />
+      </div>
     </div>
 
     <p className="text-xs text-slate-400">
-      Sample IDs are derived from filenames and cannot be changed.
+      Default settings are recommended for most users. Advanced parameters
+      will be configurable later.
     </p>
   </div>
 )}
@@ -507,11 +678,26 @@ export default function ProjectPageUbuntu() {
               <div className="space-y-4">
 
 
-              
+
                 <ReferenceCheckBanner />
-                
-                <Button onClick={runPipeline}>Start analysis</Button>
-                <Button onClick={()=>{window.electron.invoke("docker:logs","twine-"+twine?.projectId);}}>Logs</Button>
+
+                <div className="mt-6 flex items-center gap-3">
+  <Button onClick={runPipeline}>
+    Start analysis
+  </Button>
+
+  <Button
+    variant="outline"
+    onClick={() => {
+      window.electron.invoke(
+        "docker:logs",
+        "twine-" + twine?.projectId
+      )
+    }}
+  >
+    Logs
+  </Button>
+</div>
                 <LiveLogStream
                   subscribe={(cb) => {
                     window.pipeline.onLog(cb)
