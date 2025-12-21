@@ -41,6 +41,7 @@ import SystemMonitorNew from "../SystemMonitor/SystemMonitorNew"
 import HeaderBar from "../HeaderBar/HeaderBar"
 import { useTwineStore } from "../../store/useTwineStore"
 import HeaderBarProject from "../HeaderBar/HeaderBarProject"
+import PipelinePanel from "../pipelineStatus/PipelinePanel"
 
 export default function ProjectPageUbuntu() {
   const [project, setProject] = useState(null)
@@ -168,6 +169,8 @@ export default function ProjectPageUbuntu() {
       console.log("m",m);
     });
   }); */
+  
+  
   /*const runPipeline = async () => {
     const res = await window.pipeline.start()
     if (res?.ok === false) {
@@ -248,6 +251,8 @@ export default function ProjectPageUbuntu() {
                 >
                   Add FASTQ files
                 </Button>
+
+                <PipelinePanel />
 
                 <FastqDropZone
                   onDrop={async (paths) => {
@@ -333,7 +338,7 @@ export default function ProjectPageUbuntu() {
                     return () => window.pipeline.onEnd(cb)
                   }}
                 />
-                <PipelineTimeline steps={pipelineSteps} />
+                <PipelinePanel />
               </div>
             )}
           </section>

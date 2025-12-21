@@ -58,19 +58,21 @@ export default function ProjectsList({ mode = "full" }) {
           {!loading &&
             projects.map((p, idx) => (
               <div
-                key={p.projectId}
-                onClick={async () => {
-                  await window.electron.invoke("project:open", p.twinePath)
-                  navigate("/newproject")
-                }}
-                className={`
-                  cursor-pointer
-                  transition-colors
-                  hover:bg-slate-50
-                  ${idx !== projects.length - 1 ? "border-b border-slate-100" : ""}
-                  ${isCompact ? "px-3 py-2" : "px-4 py-2"}
-                `}
-              >
+  key={p.projectId}
+  onClick={async () => {
+    await window.electron.invoke("project:open", p.twinePath)
+    navigate("/newproject")
+  }}
+  className={`
+    cursor-pointer
+    transition-colors transition-border
+    border border-transparent
+    hover:border-slate-300
+    hover:bg-slate-50
+    ${idx !== projects.length - 1 ? "border-b-slate-100" : ""}
+    ${isCompact ? "px-3 py-2" : "px-4 py-2"}
+  `}
+>
                 {/* FULL MODE */}
                 {!isCompact && (
                   <div className="grid grid-cols-[2fr_3fr_1.5fr] items-center text-[12px]">

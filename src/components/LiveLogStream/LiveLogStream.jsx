@@ -17,6 +17,7 @@ useEffect(() => {
   console.log("ueee");
 
   const unsubscribe = subscribe((msg) => {
+    if(msg)
     console.log("mymessage",msg);
     msg = msg?.message;
     setLogs((prev) => {
@@ -122,8 +123,11 @@ function LogLine({ log }) {
   )
 }
 function inferType(msg) {
-  
-  const m = msg.toLowerCase()
+  if(msg==undefined)
+  {
+    return "info";
+  }
+  const m = msg?.toLowerCase()
   if (m.includes("failed") || m.includes("error")) return "error"
   if (m.includes("warn")) return "warn"
   if (m.includes("done") || m.includes("success")) return "success"

@@ -131,11 +131,19 @@ export default function HeaderBarProject() {
 
         {/* Time */}
         {twine?.createdAt && (
-          <div className="flex items-center gap-1 text-slate-600">
-            <Timer className="h-4 w-4" />
-            <span className="font-mono tabular-nums">{elapsed}</span>
-          </div>
-        )}
+  <div className="flex flex-col text-slate-600">
+    <span className="text-[10px] uppercase">
+      Elapsed Time
+    </span>
+
+    <div className="flex items-center gap-1">
+      <Timer className="h-4 w-4" />
+      <span className="font-mono tabular-nums text-xs">
+        {elapsed}
+      </span>
+    </div>
+  </div>
+)}
       </div>
 
       {/* ======================================================
