@@ -143,7 +143,7 @@ export default function ProjectPage() {
 
   const [lastLog, setLasLog] = useState("");
 
-  useEffect(() => {
+  /* useEffect(() => {
     window.pipeline.onLog((msg) => {
       //console.log("PIPELINE:", msg)
       setLasLog(msg);
@@ -152,7 +152,7 @@ export default function ProjectPage() {
     window.pipeline.onEnd((msg) => {
       console.log("PIPELINE END:", msg)
     })
-  }, [])
+  }, []) */
 
   const runPipeline = async () => {
     const res = await window.pipeline.start()

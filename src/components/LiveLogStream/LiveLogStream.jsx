@@ -9,12 +9,16 @@ export default function LiveLogStream({ subscribe }) {
   const pinnedRef = useRef(true)
 
   // subscribe ONCE
+  console.log("llive");
   const lastTextRef = useRef(null)
 
 useEffect(() => {
   if (!subscribe) return
+  console.log("ueee");
 
   const unsubscribe = subscribe((msg) => {
+    console.log("mymessage",msg);
+    msg = msg?.message;
     setLogs((prev) => {
       const type = inferType(msg)
 
@@ -118,6 +122,7 @@ function LogLine({ log }) {
   )
 }
 function inferType(msg) {
+  
   const m = msg.toLowerCase()
   if (m.includes("failed") || m.includes("error")) return "error"
   if (m.includes("warn")) return "warn"

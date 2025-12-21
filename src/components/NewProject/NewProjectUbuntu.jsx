@@ -18,6 +18,7 @@ import {
 import { FastqDropZone } from "../DropZone/DropZone"
 import FilesPreviewer from "../FilesPreviewer/FilesPreviewer"
 import { useTwineStore } from "../../store/useTwineStore"
+import HeaderBar from "../HeaderBar/HeaderBar"
 
 export default function NewProjectUbuntu() {
 
@@ -53,24 +54,7 @@ export default function NewProjectUbuntu() {
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-800">
       {/* ---------------- Header ---------------- */}
-      <header
-        className="
-          flex items-center gap-4
-          border-b border-[#d6dbe0]
-          bg-[#fafafa]
-          px-6 py-4
-          shadow-sm
-        "
-      >
-        <img src={logo} alt="Twine Logo" className="h-15 w-32" />
-
-        <div>
-          <h1 className="text-sm font-semibold">Twine Studio</h1>
-          <p className="text-xs text-slate-600">
-            Reproducible bioinformatics pipelines
-          </p>
-        </div>
-      </header>
+      <HeaderBar />
 
       {/* ---------------- Main Layout ---------------- */}
       <main className="mx-auto max-w-6xl px-6 py-6">

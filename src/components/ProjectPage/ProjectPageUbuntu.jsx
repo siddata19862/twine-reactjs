@@ -40,14 +40,25 @@ import { useNavigate } from "react-router"
 import SystemMonitorNew from "../SystemMonitor/SystemMonitorNew"
 import HeaderBar from "../HeaderBar/HeaderBar"
 import { useTwineStore } from "../../store/useTwineStore"
+import HeaderBarProject from "../HeaderBar/HeaderBarProject"
 
 export default function ProjectPageUbuntu() {
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
 
+  
+
   const twine = useTwineStore((s) => s.twine)
-      console.log("twineee - Project Page",twine);
+      //console.log("twineee - Project Page",twine);
+
+  useEffect(()=>{
+    //console.log("mytwine",twine);
+    if(!twine) return;
+    console.log("dockerlog","twine-"+twine?.projectId);
+    
+    //window.electron.invoke("docker:logs","twine-"+twine?.projectId);
+  },[twine]);
 
   const navigate = useNavigate()
 
@@ -152,6 +163,11 @@ export default function ProjectPageUbuntu() {
     setProject(updated)
   }
 
+  /* useEffect(()=>{
+    window.pipeline.onLog((m)=>{
+      console.log("m",m);
+    });
+  }); */
   /*const runPipeline = async () => {
     const res = await window.pipeline.start()
     if (res?.ok === false) {
@@ -166,7 +182,7 @@ export default function ProjectPageUbuntu() {
         }
     }
 
-  const steps = ["Files", "Configure", "Settings", "Run"]
+  const steps = ["Files", "Configure", "Settings", "Run","Output"]
 
   /* ---------------- guards ---------------- */
   if (loading) {
@@ -177,19 +193,19 @@ export default function ProjectPageUbuntu() {
     )
   }
 
-  if (!project) {
+  /*if (!project) {
     return (
       <div className="flex h-screen items-center justify-center text-sm text-slate-500">
         No active project
       </div>
     )
-  }
+  }*/
 
   /* ===================================================== */
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-800">
       {/* ---------------- HEADER ---------------- */}
-      <HeaderBar />
+      <HeaderBarProject />
 
       {/* ---------------- MAIN ---------------- */}
       <main className="mx-auto max-w-6xl px-6 py-6">
@@ -310,6 +326,7 @@ export default function ProjectPageUbuntu() {
               <div className="space-y-4">
                 <Button onClick={()=>navigate("/newproject")}>Back</Button>
                 <Button onClick={runPipeline}>Start analysis</Button>
+                <Button onClick={()=>{window.electron.invoke("docker:logs","twine-"+twine?.projectId);}}>Logs</Button>
                 <LiveLogStream
                   subscribe={(cb) => {
                     window.pipeline.onLog(cb)

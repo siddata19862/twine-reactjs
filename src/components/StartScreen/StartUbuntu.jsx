@@ -28,7 +28,7 @@ export default function StartUbuntu() {
   onDrop([folder])
 }
 
-    useEffect(() => {
+    /*useEffect(() => {
         window.pipeline.onLog((msg) => {
         console.log("PIPELINE:", msg)
         
@@ -37,7 +37,7 @@ export default function StartUbuntu() {
         window.pipeline.onEnd((msg) => {
         console.log("PIPELINE END:", msg)
         })
-    }, [])
+    }, []) */
 
     const runPipeline = async () => {
         const res = await window.pipeline.run()
@@ -50,7 +50,7 @@ export default function StartUbuntu() {
 
     const [selectedFastqs, setSelectedFastqs] = useState([])
     const twine = useTwineStore((s) => s.twine)
-    console.log("twineee",twine);
+    //console.log("twineee",twine);
 
 
     useEffect(()=>{
@@ -171,13 +171,13 @@ export default function StartUbuntu() {
             {/* ---------------- Main Split View ---------------- */}
             <main className="mx-auto max-w-6xl px-6 py-6">
 
-<ProjectsList />
+{/*<ProjectsList />
 <LiveLogStream
                     subscribe={(cb) => {
                       window.pipeline.onLog(cb)
                       return () => window.pipeline.onEnd(cb)
                     }}
-                  />
+                  /> */}
                 <div className="
           grid grid-cols-[3fr_2fr]
           border border-[#d6dbe0]
@@ -338,26 +338,9 @@ export default function StartUbuntu() {
                                 Recent Projects
                             </h3>
 
-                            <ul className="space-y-1 text-xs">
-                                {[
-                                    "Gut_16S_Run_01",
-                                    "Soil_Microbiome",
-                                    "Cancer_Pilot_A",
-                                    "Mock_Community",
-                                ].map((name) => (
-                                    <li
-                                        key={name}
-                                        className="
-                      cursor-pointer
-                      rounded
-                      px-2 py-1
-                      hover:bg-[#edf1f5]
-                    "
-                                    >
-                                        {name}
-                                    </li>
-                                ))}
-                            </ul>
+                            <ProjectsList mode="compact" />
+
+                            
                         </div>
                     </aside>
 
