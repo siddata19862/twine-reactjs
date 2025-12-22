@@ -8,26 +8,30 @@ import { useSystemStore } from "../../store/useSystemStore"
 ===================================================== */
 
 function Bar({ value, color }) {
+  const safe = Number(value) || 0
+
   return (
-    <div className="h-2 w-28 rounded bg-slate-200 overflow-hidden">
+    <div className="h-2 flex-1 min-w-[80px] rounded bg-slate-200 overflow-hidden">
       <div
         className={`h-full ${color} transition-all duration-300`}
-        style={{ width: `${Math.min(value, 100)}%` }}
+        style={{ width: `${Math.min(safe, 100)}%` }}
       />
     </div>
   )
 }
 
-function UsageDial({ value, size = 100 }) {
+function UsageDial({ value, size = 80 }) {
+  const safe = Number(value) || 0
+
   const stroke = size <= 60 ? 2 : 3
   const r = size / 2 - stroke
   const c = 2 * Math.PI * r
-  const offset = c - (value / 100) * c
+  const offset = c - (safe / 100) * c
 
   const color =
-    value < 60
+    safe < 60
       ? "#10b981"
-      : value < 80
+      : safe < 80
       ? "#f59e0b"
       : "#ef4444"
 
@@ -59,25 +63,26 @@ function UsageDial({ value, size = 100 }) {
         y="52%"
         textAnchor="middle"
         dominantBaseline="middle"
-        fontSize={size <= 60 ? "10" : "14"}
+        fontSize={size <= 60 ? "10" : "12"}
         className="fill-slate-700 font-semibold tabular-nums"
       >
-        {value}%
+        {safe}%
       </text>
     </svg>
   )
 }
 
 function MemoryBlocks({ percent }) {
-  const blocks = 32
-  const filled = Math.round((percent / 100) * blocks)
+  const safe = Number(percent) || 0
+  const blocks = 24
+  const filled = Math.round((safe / 100) * blocks)
 
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5 flex-1 min-w-[120px]">
       {Array.from({ length: blocks }).map((_, i) => (
         <div
           key={i}
-          className={`h-3 w-1 rounded-sm ${
+          className={`h-3 flex-1 rounded-sm ${
             i < filled ? "bg-emerald-500" : "bg-slate-200"
           }`}
         />
@@ -102,62 +107,40 @@ function formatUptime(seconds = 0) {
 
 export default function SystemMonitorNew({ mode = "vertical" }) {
   const statsFromIPC = useSystemStore(s => s.stats)
-  const infoFromIPC  = useSystemStore(s => s.info)
+  const infoFromIPC = useSystemStore(s => s.info)
 
   const history = useRollingHistory()
   const [stats, setStats] = useState(null)
-
-  /* ---------- LAYOUT MODES ---------- */
 
   const isHorizontal = mode === "horizontal"
 
   const layout = {
     root: isHorizontal
-      ? "flex gap-6 items-start"
-      : "space-y-5",
+      ? "flex gap-4 items-start w-full min-w-0"
+      : "space-y-4 w-full min-w-0 max-w-[320px]",
 
-    cpuBlock: isHorizontal
-      ? "flex flex-col gap-3 w-[360px]"
-      : "space-y-2",
+    block: "w-full min-w-0",
 
-    cpuInner: isHorizontal
-      ? "flex items-start gap-4"
-      : "flex gap-4 items-start",
+    cpuInner: "flex gap-3 items-start",
 
-    cpuDial: isHorizontal
-      ? "shrink-0"
-      : "",
+    graphIndent: isHorizontal ? "" : "pl-[60px]",
 
-    cpuCores: isHorizontal
-      ? "flex-1"
-      : "",
-
-    graphIndent: isHorizontal
-      ? "pl-0"
-      : "pl-[76px]",
-
-    ramMini: isHorizontal
-      ? "flex items-center gap-3"
-      : "pl-[76px] flex items-center gap-3 pt-2",
-
-    ramBlock: isHorizontal
-      ? "flex flex-col gap-3 w-[360px]"
-      : "space-y-2",
+    ramMini: "flex items-center gap-3",
   }
-
-  /* ---------- LIVE STATS ---------- */
 
   useEffect(() => {
     if (!statsFromIPC) return
 
-    const cpuTotal = statsFromIPC.cpu?.avg ?? 0
-    const cpuCores = statsFromIPC.cpu?.cores ?? []
+    const cpuTotal = Number(statsFromIPC.cpu?.avg ?? 0)
+    const cpuCores = (statsFromIPC.cpu?.cores ?? []).map(c => Number(c))
 
-    const ramUsed = statsFromIPC.ram?.used ?? 0
-    const ramTotal = statsFromIPC.ram?.total ?? 1
+    const ramUsed = Number(statsFromIPC.ram?.used ?? 0)
+    const ramTotal = Number(statsFromIPC.ram?.total ?? 1)
     const ramPercent =
-      statsFromIPC.ram?.percent ??
-      Math.round((ramUsed / ramTotal) * 100)
+      Number(
+        statsFromIPC.ram?.percent ??
+          Math.round((ramUsed / ramTotal) * 100)
+      )
 
     setStats({
       cpu: { total: cpuTotal, cores: cpuCores },
@@ -170,75 +153,53 @@ export default function SystemMonitorNew({ mode = "vertical" }) {
   }, [statsFromIPC])
 
   if (!stats) return null
-
   const info = infoFromIPC ?? {}
 
   return (
     <div className={`${layout.root} text-xs text-slate-700`}>
 
       {/* ================= CPU ================= */}
-      <div className={layout.cpuBlock}>
+      <div className={layout.block}>
 
         {/* SYSTEM INFO */}
-        {info && (
-          <div className="border-t pt-2 text-[10px] text-slate-500 grid grid-cols-2 gap-x-6 gap-y-1">
-            <div>OS: <span className="text-slate-700">{info.os.platform}</span></div>
-            <div>Arch: <span className="text-slate-700">{info.os.arch}</span></div>
-
-            <div className="col-span-2 truncate">
-              CPU:{" "}
-              <span className="text-slate-700">
-                {info.cpu.model} ({info.cpu.speedMHz}MHz)
-              </span>
-            </div>
-
-            <div>Cores: <span className="text-slate-700">{info.cpu.cores}</span></div>
-            <div>
-              Uptime:{" "}
-              <span className="text-slate-700">
-                {formatUptime(info.os.uptime)}
-              </span>
-            </div>
-
-            <div className="col-span-2">
-              Memory:{" "}
-              <span className="text-slate-700">
-                {info.memory.totalMB} MB
-              </span>
-            </div>
+        <div className="text-[10px] text-slate-500 grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
+          <div>
+            OS: <span className="text-slate-700">{info.os?.platform}</span>
           </div>
-        )}
+          <div>
+            Arch: <span className="text-slate-700">{info.os?.arch}</span>
+          </div>
+          <div className="col-span-2 truncate">
+            CPU: <span className="text-slate-700">{info.cpu?.model}</span>
+          </div>
+          <div>
+            Cores: <span className="text-slate-700">{info.cpu?.cores}</span>
+          </div>
+          <div>
+            Uptime:{" "}
+            <span className="text-slate-700">
+              {formatUptime(info.os?.uptime)}
+            </span>
+          </div>
+        </div>
 
-        {/* CPU DIAL + CORES (SIDE-BY-SIDE IN HORIZONTAL MODE) */}
         <div className={layout.cpuInner}>
+          <UsageDial value={stats.cpu.total} size={isHorizontal ? 80 : 70} />
 
-          {/* DIAL */}
-          <div className={layout.cpuDial}>
-            <UsageDial value={stats.cpu.total} size={100} />
-          </div>
-
-          {/* CORES */}
-          <div className={`space-y-1 ${layout.cpuCores}`}>
+          <div className="flex-1 space-y-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="w-10 font-medium">CPU</span>
-              <Bar
-                value={stats.cpu.total}
-                color="bg-gradient-to-r from-blue-500 to-purple-500"
-              />
-              <span className="w-10 text-right tabular-nums">
+              <span className="w-8 font-medium">CPU</span>
+              <Bar value={stats.cpu.total} color="bg-indigo-500" />
+              <span className="w-8 text-right tabular-nums">
                 {stats.cpu.total}%
               </span>
             </div>
 
             {stats.cpu.cores.map((c, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-10 text-[10px] text-slate-400">
-                  C{i}
-                </span>
+                <span className="w-8 text-[10px] text-slate-400">C{i}</span>
                 <Bar value={c} color="bg-slate-400" />
-                <span className="w-8 text-right text-[10px] tabular-nums">
-                  {c}%
-                </span>
+                <span className="w-8 text-right text-[10px]">{c}%</span>
               </div>
             ))}
           </div>
@@ -249,10 +210,10 @@ export default function SystemMonitorNew({ mode = "vertical" }) {
         </div>
 
         <div className={layout.ramMini}>
-          <UsageDial value={stats.ram.percent} size={52} />
+          <UsageDial value={stats.ram.percent} size={48} />
           <div className="text-[10px] text-slate-500">
-            <div className="font-medium text-slate-600">RAM</div>
-            <div className="tabular-nums">
+            <div className="font-medium">RAM</div>
+            <div>
               {stats.ram.used} / {stats.ram.total} MB
             </div>
           </div>
@@ -260,26 +221,16 @@ export default function SystemMonitorNew({ mode = "vertical" }) {
       </div>
 
       {/* ================= RAM ================= */}
-      <div className={layout.ramBlock}>
+      <div className={layout.block}>
         <div className="flex items-center gap-2">
-          <span className="w-10 font-medium">RAM</span>
+          <span className="w-8 font-medium">RAM</span>
           <MemoryBlocks percent={stats.ram.percent} />
-          <span className="ml-auto tabular-nums">
-            {stats.ram.used} / {stats.ram.total} MB
-            <span className="ml-2 text-slate-500">
-              ({stats.ram.percent}%)
-            </span>
+          <span className="tabular-nums text-[10px]">
+            {stats.ram.percent}%
           </span>
         </div>
 
         <LineGraph data={history.ram} color="#10b981" />
-      </div>
-
-      {/* ================= EXTRAS ================= */}
-      <div className="flex justify-between text-[10px] text-slate-500">
-        <span>Disk ↑ {stats.disk.read} MB/s</span>
-        <span>↓ {stats.disk.write} MB/s</span>
-        <span>Load {stats.load.join(" / ")}</span>
       </div>
     </div>
   )

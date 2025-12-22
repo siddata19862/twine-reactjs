@@ -31,7 +31,7 @@ export const router = createBrowserRouter
         
         {
           path: "/",
-          element: <StartUbuntu />,
+          element: <SplashScreen />,
           loader: () => {
             
           }
@@ -39,7 +39,7 @@ export const router = createBrowserRouter
 
         
         
-        
+        { path: "/home", element: <StartUbuntu /> },
         { path: "/filemanager2", element: <FileManager /> },
         { path: "/project", element: <ProjectPageUbuntu /> },
         { path: "/results", element: <ResultsPage /> },

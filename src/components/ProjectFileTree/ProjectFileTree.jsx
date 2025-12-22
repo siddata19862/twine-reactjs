@@ -23,6 +23,13 @@ export default function ProjectFileTree() {
 /* ---------- tree node ---------- */
 
 function TreeNode({ node, level }) {
+  // ❌ skip unwanted nodes
+  if (
+    node.name === "?" ||
+    node.name === ".DS_Store" || node.name === ".twine" || node.name === "artifacts" || node.name === "checkpoints"
+  ) {
+    return null
+  }
   const [open, setOpen] = useState(true)
   const isFolder = node.type === "folder"
 

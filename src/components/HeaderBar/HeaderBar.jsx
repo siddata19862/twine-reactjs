@@ -81,7 +81,7 @@ export default function HeaderBar() {
         <img src={logo} alt="Twine" className="h-9 w-auto" />
 
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           className="rounded-md p-2 text-slate-600 hover:bg-slate-200/60"
           title="Home"
         >

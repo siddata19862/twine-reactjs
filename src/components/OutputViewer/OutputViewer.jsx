@@ -6,6 +6,48 @@ import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
+/* =====================================================
+   TREE FILTER HELPERS
+===================================================== */
+
+const HIDDEN_NAMES = [
+  ".twine",
+  "artifacts",
+  "checkpoints",
+  "data.json",
+  "project.twine",
+  "status.json",
+  ".DS_Store",
+  "?",
+]
+
+function shouldHide(node) {
+  if (!node?.name) return true
+
+  // exact hidden names
+  if (HIDDEN_NAMES.includes(node.name)) return true
+
+  // hide dotfiles / dotfolders
+  if (node.name.startsWith(".")) return true
+
+  return false
+}
+
+function filterTree(nodes = []) {
+  return nodes
+    .filter(node => !shouldHide(node))
+    .map(node => ({
+      ...node,
+      children: node.children
+        ? filterTree(node.children)
+        : undefined,
+    }))
+}
+
+/* =====================================================
+   OUTPUT VIEWER
+===================================================== */
+
 export default function OutputViewer() {
   const twine = useTwineStore(s => s.twine)
 
@@ -16,7 +58,10 @@ export default function OutputViewer() {
 
   useEffect(() => {
     if (!twine?.projectDir) return
-    window.electron.invoke("outputs:list", twine.projectDir).then(setTree)
+
+    window.electron
+      .invoke("outputs:list", twine.projectDir)
+      .then(raw => setTree(filterTree(raw)))
   }, [twine])
 
   useEffect(() => {
@@ -30,7 +75,7 @@ export default function OutputViewer() {
   return (
     <Card
       className="
-        gap-0 py-0 
+        gap-0 py-0
         h-full
         grid grid-rows-[auto_1fr]
         overflow-hidden
@@ -103,9 +148,10 @@ export default function OutputViewer() {
     </Card>
   )
 }
-/* =======================
+
+/* =====================================================
    TREE NODE
-======================= */
+===================================================== */
 
 function TreeNode({
   node,
@@ -163,14 +209,14 @@ function TreeNode({
   )
 }
 
-/* =======================
+/* =====================================================
    PREVIEW
-======================= */
+===================================================== */
 
 function Preview({ file }) {
   const ext = file.path.split(".").pop().toLowerCase()
 
-  if (["html", "htm", "json", "csv"].includes(ext)) {
+  if (["html", "htm", "json", "csv","txt"].includes(ext)) {
     return (
       <iframe
         src={file.url}

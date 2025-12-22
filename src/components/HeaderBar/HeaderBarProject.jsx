@@ -23,22 +23,39 @@ export default function HeaderBarProject() {
   const [elapsed, setElapsed] = useState("00:00:00")
 
   useEffect(() => {
-    if (!twine?.createdAt) return
+  if (!twine?.createdAt) return
 
-    const start = new Date(twine.createdAt).getTime()
+  const start = new Date(twine.createdAt).getTime()
 
-    const tick = () => {
-      const diff = Math.floor((Date.now() - start) / 1000)
-      const h = String(Math.floor(diff / 3600)).padStart(2, "0")
-      const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0")
-      const s = String(diff % 60).padStart(2, "0")
-      setElapsed(`${h}:${m}:${s}`)
-    }
+  // If completed, freeze end time
+  const end =
+    twine.status === "completed"
+      ? Date.now()
+      : null
 
-    tick()
-    const i = setInterval(tick, 1000)
-    return () => clearInterval(i)
-  }, [twine?.startedAt])
+  const tick = () => {
+    const now =
+      twine.status === "completed"
+        ? end
+        : Date.now()
+
+    const diff = Math.floor((now - start) / 1000)
+
+    const h = String(Math.floor(diff / 3600)).padStart(2, "0")
+    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0")
+    const s = String(diff % 60).padStart(2, "0")
+
+    setElapsed(`${h}:${m}:${s}`)
+  }
+
+  tick()
+
+  // ⛔ Stop interval once completed
+  if (twine.status === "completed") return
+
+  const i = setInterval(tick, 1000)
+  return () => clearInterval(i)
+}, [twine?.createdAt, twine?.status])
 
   /* ----------------------------
      Status styling
@@ -51,14 +68,17 @@ export default function HeaderBarProject() {
   }[twine?.status ?? "idle"]
 
   return (
-    <header className="
-      flex items-center justify-between
-      border-b border-[#d6dbe0]
-      bg-gradient-to-b from-[#fcfcfd] to-[#f4f6f8]
-      px-6 py-3
-      shadow-sm
-      select-none
-    ">
+    <header
+  className="
+    fixed top-0 left-0 right-0 z-50
+    flex items-center justify-between
+    border-b border-[#d6dbe0]
+    bg-gradient-to-b from-[#fcfcfd] to-[#f4f6f8]
+    px-6 py-3
+    shadow-sm
+    select-none
+  "
+>
       {/* ======================================================
          LEFT: Logo + Project
       ====================================================== */}
@@ -66,7 +86,7 @@ export default function HeaderBarProject() {
         <img src={logo} alt="Twine" className="h-9 w-auto" />
 
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           className="rounded-md p-2 text-slate-600 hover:bg-slate-200/60"
           title="Home"
         >
@@ -84,15 +104,22 @@ export default function HeaderBarProject() {
             <span className="text-slate-300">•</span>
 
             <button
-              onClick={() =>
-                twine?.projectDir &&
-                window.electron?.invoke("project:openFolder", twine.projectDir)
-              }
-              className="flex items-center gap-1 hover:text-slate-700"
-            >
-              <FolderOpen className="h-3.5 w-3.5" />
-              Open folder
-            </button>
+  onClick={() =>
+    twine?.projectDir &&
+    window.electron?.invoke("project:openFolder", twine.projectDir)
+  }
+  className="
+    flex items-center gap-1
+    text-slate-600
+    hover:text-slate-800
+    hover:underline
+    underline-offset-4
+    cursor-pointer
+  "
+>
+  <FolderOpen className="h-3.5 w-3.5" />
+  Open folder
+</button>
           </div>
         </div>
       </div>
@@ -133,7 +160,9 @@ export default function HeaderBarProject() {
         {twine?.createdAt && (
   <div className="flex flex-col text-slate-600">
     <span className="text-[10px] uppercase">
-      Elapsed Time
+      {twine?.status === "completed"
+        ? "Analysis Duration"
+        : "Elapsed Time"}
     </span>
 
     <div className="flex items-center gap-1">

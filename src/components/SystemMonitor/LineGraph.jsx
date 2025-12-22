@@ -1,7 +1,7 @@
 export default function LineGraph({
   data,
   color = "#000",
-  height = 40,
+  height = 20,
   strokeWidth = 0.5,
   minY = 0,
   maxY = 100,

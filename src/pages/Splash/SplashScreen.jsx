@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
+import logo from "/logoNew.png"
 //import { useNavigate } from "react-router-dom"
 
 
@@ -7,7 +8,7 @@ const Styles = {
 
   splash: {
     height: "100vh",
-    background: "#0f172a",
+    background: "#2a9969",
     color: "#ffffff",
     display: "flex",
     flexDirection: "column",
@@ -38,7 +39,7 @@ const Styles = {
 
   loaderBar: {
     height: "100%",
-    background: "linear-gradient(90deg, #38bdf8, #6366f1)",
+    background: "linear-gradient(90deg, #56d39dff, #2bbb7dff)",
     transition: "width 0.2s ease",
   },
 
@@ -86,7 +87,9 @@ export default function SplashScreen() {
         ...(fadeOut ? Styles.fadeOut : {}),
       }}
     >
-      <div style={Styles.logo}>Twine</div>
+      
+      <img src={logo} style={{height:150}} />
+      
 
       <div style={Styles.loader}>
         <div

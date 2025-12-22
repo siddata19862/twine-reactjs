@@ -8,8 +8,17 @@ import {
   Check,
   ChevronDown,
   AlertTriangle,
+
+  Clock,
+  FolderOpen,
   Info,
 } from "lucide-react"
+
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible"
 
 import logo from "/logo.png"
 import { toast } from "sonner"
@@ -17,6 +26,7 @@ import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 import {
   Popover,
@@ -129,6 +139,11 @@ export default function ProjectPageUbuntu() {
     if (!twine) return;
     console.log("dockerlog", "twine-" + twine?.projectId);
     console.log("twine", twine);
+
+    console.log("syncing");
+    window.electron.invoke("fs:startSync", twine.projectDir)
+
+    if(twine?.status && twine.status=="completed") setActiveStep(4)
     //window.electron.invoke("docker:logs","twine-"+twine?.projectId);
   }, [twine]);
 
@@ -199,6 +214,7 @@ export default function ProjectPageUbuntu() {
     qc: "fastqc",
     trimming: "fastp",
     alignment: "bwa-mem",
+    denoising: "dada2",
     variant: "haplotypecaller",
   })
 
@@ -215,11 +231,11 @@ export default function ProjectPageUbuntu() {
     load()
   }, [])*/
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!twine) return
     console.log("syncing");
     window.electron.invoke("fs:startSync", twine.projectDir)
-  }, [twine])
+  }, [twine]) */
 
   /* ---------------- actions ---------------- */
   const addFastq = async () => {
@@ -285,10 +301,11 @@ export default function ProjectPageUbuntu() {
       {/* ---------------- HEADER ---------------- */}
       <HeaderBarProject />
 
+
       {/* ---------------- MAIN ---------------- */}
-      <main className="mx-auto max-w-6xl px-6 py-6">
-        
-        
+      <main className="mx-auto max-w-6xl px-6 py-6 mt-14">
+
+
         <div className="
   grid grid-cols-[4fr_1fr]
   border border-[#d6dbe0]
@@ -302,6 +319,7 @@ export default function ProjectPageUbuntu() {
             <div className="flex gap-1 rounded bg-slate-100 p-1">
               {steps.map((s, i) => (
                 <button
+                  disabled={twine?.status && twine.status=="completed"}
                   key={s}
                   onClick={() => setActiveStep(i)}
                   className={`
@@ -392,7 +410,7 @@ export default function ProjectPageUbuntu() {
               </div>
             )}
 
-            
+
 
 
 
@@ -489,192 +507,242 @@ export default function ProjectPageUbuntu() {
 
 
             {/* -------- CONFIG -------- */}
-{/* STEP 2 — CONFIGURE */}
-{activeStep === 2 && (
-  <div className="space-y-8">
-    <h3 className="text-sm font-medium text-slate-700">
-      Configure pipeline
-    </h3>
+            {/* STEP 2 — CONFIGURE */}
+            {activeStep === 2 && (
+              <div className="space-y-8">
+                <h3 className="text-sm font-medium text-slate-700">
+                  Configure pipeline
+                </h3>
 
-    {/* TOOL SELECTION */}
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* TOOL SELECTION */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-      {/* STEP 1 — Raw QC */}
-      <PipelineCard
-        step={1}
-        title="Raw Read QC"
-        value={pipelineConfig.qc}
-        options={[
-          { label: "FastQC (Recommended)", value: "fastqc" },
-          { label: "MultiQC", value: "multiqc" },
-        ]}
-        onChange={(v) => updatePipeline("qc", v)}
-      />
+                  {/* STEP 1 — Raw QC */}
+                  <PipelineCard
+                    step={1}
+                    title="Raw Read QC"
+                    value={pipelineConfig.qc}
+                    options={[
+                      { label: "FastQC (Recommended)", value: "fastqc" },
+                      { label: "MultiQC", value: "multiqc" },
+                    ]}
+                    onChange={(v) => updatePipeline("qc", v)}
+                  />
 
-      {/* STEP 2 — Trimming */}
-      <PipelineCard
-        step={2}
-        title="Pre-processing (Trimming)"
-        value={pipelineConfig.trimming}
-        options={[
-          { label: "fastp (Recommended)", value: "fastp" },
-          { label: "Trimmomatic", value: "trimmomatic" },
-        ]}
-        onChange={(v) => updatePipeline("trimming", v)}
-      />
+                  {/* STEP 2 — Trimming */}
+                  <PipelineCard
+                    step={2}
+                    title="Pre-processing (Trimming)"
+                    value={pipelineConfig.trimming}
+                    options={[
+                      { label: "fastp (Recommended)", value: "fastp" },
+                      { label: "Trimmomatic", value: "trimmomatic" },
+                    ]}
+                    onChange={(v) => updatePipeline("trimming", v)}
+                  />
 
-      {/* STEP 3 — Denoising */}
-      <PipelineCard
-        step={3}
-        title="Denoising"
-        
-        options={[
-          { label: "DADA2 (Recommended)", value: "dada2" },
-          { label: "QIIME2 (Coming soon)", value: "qiime2" },
-        ]}
-        onChange={(v) => updatePipeline("denoising", v)}
-      />
-    </div>
 
-    {/* TAXONOMY */}
-    <div className="rounded-lg border bg-white p-4 space-y-4">
-      <div>
-        <p className="text-sm font-medium text-slate-700">
-          Taxonomy Assignment
-        </p>
-        <p className="text-xs text-slate-500">
-          Choose taxonomy method and reference database
-        </p>
-      </div>
+                  {/* STEP 3 — Denoising */}
+                  <PipelineCard
+                    step={3}
+                    title="Denoising"
+                    value={pipelineConfig.denoising}
+                    options={[
+                      { label: "DADA2 (Recommended)", value: "dada2" },
+                      { label: "QIIME2 (Coming soon)", value: "qiime2" },
+                    ]}
+                    onChange={(v) => updatePipeline("denoising", v)}
+                  />
+                </div>
 
-      {/* Method */}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Method
-        </p>
+                {/* TAXONOMY */}
+                <div className="rounded-lg border bg-white p-4 space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">
+                      Taxonomy Assignment
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Choose taxonomy method and reference database
+                    </p>
+                  </div>
 
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              checked={pipelineConfig.taxonomy?.engine === "dada2"}
-              onChange={() =>
-                updatePipeline("taxonomy", {
-                  ...pipelineConfig.taxonomy,
-                  engine: "dada2",
-                })
-              }
-            />
-            DADA2 (Default)
-          </label>
+                  {/* Method */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Method
+                    </p>
 
-          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-not-allowed">
-            <input type="radio" disabled />
-            QIIME2 (Coming soon)
-          </label>
-        </div>
-      </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* DADA2 */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updatePipeline("taxonomy", {
+                            ...pipelineConfig.taxonomy,
+                            engine: "dada2",
+                          })
+                        }
+                        className={`
+        relative rounded-md border px-4 py-3 text-left transition
+        ${pipelineConfig.taxonomy?.engine === "dada2"
+                            ? "border-slate-600 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-400"
+                          }
+      `}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">DADA2</span>
+                          <span className="text-[10px] rounded bg-white/20 px-1.5 py-0.5">
+                            Default
+                          </span>
+                        </div>
 
-      {/* Reference */}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Reference Database
-        </p>
+                        <p className="mt-1 text-xs opacity-80">
+                          Error-model based ASV inference
+                        </p>
+                      </button>
 
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              checked={pipelineConfig.taxonomy?.database === "silva_v138"}
-              onChange={() =>
-                updatePipeline("taxonomy", {
-                  ...pipelineConfig.taxonomy,
-                  database: "silva_v138",
-                })
-              }
-            />
-            SILVA v138 (Recommended)
-          </label>
+                      {/* QIIME2 */}
+                      <div className="relative rounded-md border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-slate-400">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">QIIME 2</span>
+                          <span className="text-[10px] rounded bg-slate-200 px-1.5 py-0.5">
+                            Soon
+                          </span>
+                        </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-not-allowed">
-            <input type="radio" disabled />
-            Greengenes2 (Coming soon)
-          </label>
-        </div>
-      </div>
-    </div>
+                        <p className="mt-1 text-xs">
+                          Plugin-based workflow (coming soon)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-    {/* VISUALIZATIONS */}
-    <div className="rounded-lg border bg-white p-4 space-y-4">
-      <div>
-        <p className="text-sm font-medium text-slate-700">
-          Visualizations
-        </p>
-        <p className="text-xs text-slate-500">
-          Select which plots and reports to generate
-        </p>
-      </div>
+                  {/* Reference Database */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Reference Database
+                    </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {[
-          { key: "alpha_diversity", label: "Alpha Diversity" },
-          { key: "alpha_rarefaction", label: "Alpha Rarefaction" },
-          { key: "beta_diversity", label: "Beta Diversity" },
-          { key: "taxonomy_barplots", label: "Taxonomy Barplots" },
-        ].map(v => (
-          <label
-            key={v.key}
-            className="flex items-center gap-2 text-sm"
-          >
-            <input
-              type="checkbox"
-              checked={pipelineConfig.visualizations?.[v.key] ?? true}
-              onChange={(e) =>
-                updatePipeline("visualizations", {
-                  ...pipelineConfig.visualizations,
-                  [v.key]: e.target.checked,
-                })
-              }
-            />
-            {v.label}
-          </label>
-        ))}
-      </div>
-    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Greengenes2 */}
+                      <div className="relative rounded-md border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-slate-400">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Greengenes 2</span>
+                          <span className="text-[10px] rounded bg-slate-200 px-1.5 py-0.5">
+                            Soon
+                          </span>
+                        </div>
 
-    {/* PERFORMANCE */}
-    <div className="rounded-lg border bg-white p-4 space-y-3">
-      <div>
-        <p className="text-sm font-medium text-slate-700">
-          Performance
-        </p>
-        <p className="text-xs text-slate-500">
-          Controls compute usage during pipeline execution
-        </p>
-      </div>
+                        <p className="mt-1 text-xs">
+                          Curated phylogenetic reference (coming soon)
+                        </p>
+                      </div>
+                      {/* SILVA */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updatePipeline("taxonomy", {
+                            ...pipelineConfig.taxonomy,
+                            database: "silva_v138",
+                          })
+                        }
+                        className={`
+        relative rounded-md border px-4 py-3 text-left transition
+        ${pipelineConfig.taxonomy?.database === "silva_v138"
+                            ? "border-slate-600  shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-400"
+                          }
+      `}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">SILVA v138</span>
+                          <span className="text-[10px] rounded bg-white/20 px-1.5 py-0.5">
+                            Recommended
+                          </span>
+                        </div>
 
-      <div className="flex items-center gap-3">
-        <label className="text-sm text-slate-600">
-          Threads
-        </label>
-        <input
-          type="number"
-          min={1}
-          className="w-20 rounded border px-2 py-1 text-sm"
-          value={pipelineConfig.threads ?? 10}
-          onChange={(e) =>
-            updatePipeline("threads", Number(e.target.value))
-          }
-        />
-      </div>
-    </div>
+                        <p className="mt-1 text-xs opacity-80">
+                          Comprehensive rRNA reference database
+                        </p>
+                      </button>
 
-    <p className="text-xs text-slate-400">
-      Default settings are recommended for most users. Advanced parameters
-      will be configurable later.
-    </p>
-  </div>
-)}
+
+                    </div>
+                  </div>
+                </div>
+
+                {/* VISUALIZATIONS */}
+                <div className="rounded-lg border bg-white p-4 space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">
+                      Visualizations
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Select which plots and reports to generate
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { key: "alpha_diversity", label: "Alpha Diversity" },
+                      { key: "alpha_rarefaction", label: "Alpha Rarefaction" },
+                      { key: "beta_diversity", label: "Beta Diversity" },
+                      { key: "taxonomy_barplots", label: "Taxonomy Barplots" },
+                    ].map(v => (
+                      <label
+                        key={v.key}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={pipelineConfig.visualizations?.[v.key] ?? true}
+                          onChange={(e) =>
+                            updatePipeline("visualizations", {
+                              ...pipelineConfig.visualizations,
+                              [v.key]: e.target.checked,
+                            })
+                          }
+                        />
+                        {v.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* PERFORMANCE */}
+                <div className="rounded-lg border bg-white p-4 space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">
+                      Performance
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Controls compute usage during pipeline execution
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm text-slate-600">
+                      Threads
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      className="w-20 rounded border px-2 py-1 text-sm"
+                      value={pipelineConfig.threads ?? 8}
+                      onChange={(e) =>
+                        updatePipeline("threads", Number(e.target.value))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-400">
+                  Default settings are recommended for most users. Advanced parameters
+                  will be configurable later.
+                </p>
+              </div>
+            )}
 
             {/* -------- RUN -------- */}
             {activeStep === 3 && (
@@ -682,104 +750,140 @@ export default function ProjectPageUbuntu() {
 
 
 
-                <ReferenceCheckBanner />
+                {!twine?.status && <ReferenceCheckBanner />}
 
                 <div className="mt-6 flex items-center gap-3">
-  <Button onClick={runPipeline}>
-    Start analysis
-  </Button>
+                  {!twine?.status && <Button onClick={runPipeline}>
+                    Start analysis
+                  </Button>}
 
-  <Button
-    variant="outline"
-    onClick={() => {
-      window.electron.invoke(
-        "docker:logs",
-        "twine-" + twine?.projectId
-      )
-    }}
-  >
-    Logs
-  </Button>
-    <Button
-    variant="outline"
-    onClick={() =>navigate("/output")}
-  >
-    results
-  </Button>
-  
-</div>
-                <LiveLogStream
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      window.electron.invoke(
+                        "docker:logs",
+                        "twine-" + twine?.projectId
+                      )
+                    }}
+                  >
+                    Logs
+                  </Button>
+
+
+                </div>
+                {(twine.status!="completed") && <LiveLogStream
                   subscribe={(cb) => {
                     window.pipeline.onLog(cb)
                     return () => window.pipeline.onEnd(cb)
                   }}
-                />
+                />}
                 <PipelinePanel />
               </div>
             )}
 
 
             {activeStep === 4 && (
-  <div className="space-y-4">
-    <div className="rounded-lg border bg-white p-5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="mt-1 rounded-full bg-emerald-100 p-2">
-          <Check className="h-5 w-5 text-emerald-600" />
-        </div>
+              <div className="space-y-4">
+                <div className="rounded-lg border bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 rounded-full bg-emerald-100 p-2">
+                      <Check className="h-5 w-5 text-emerald-600" />
+                    </div>
 
-        <div className="flex-1 space-y-2">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Outputs are ready
-          </h3>
+                    <div className="flex-1 space-y-2">
+                      <h3 className="text-sm font-semibold text-slate-900">
+                        Outputs are ready
+                      </h3>
 
-          <p className="text-sm text-slate-600">
-            The pipeline has completed successfully. All generated outputs,
-            reports, and logs are now available for review.
-          </p>
+                      <p className="text-sm text-slate-600">
+                        The pipeline has completed successfully. All generated outputs,
+                        reports, and logs are now available for review.
+                      </p>
 
-          <div className="pt-3 flex flex-wrap gap-3">
-            <Button
-              size="sm"
-              onClick={() => navigate("/output")}
-              className="gap-2"
-            >
-              View outputs
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+                      <div className="pt-3 flex flex-wrap items-center gap-3">
+                        {/* Output Viewer */}
+                        <Button
+                          size="sm"
+                          onClick={() => navigate("/output")}
+                          className="gap-2"
+                        >
+                          Output Viewer
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
 
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setActiveStep(3)}
-              className="gap-2"
-            >
-              Show run history
-              <Calendar className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                        {/* Show in Folder */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() =>
+                            twine?.projectDir &&
+                            window.electron?.invoke("project:openFolder", twine.projectDir)
+                          }
+                        >
+                          Show in folder
+                          <FolderOpen className="h-4 w-4" />
+                        </Button>
+
+                        {/* Run History — right aligned */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setActiveStep(3)}
+                          className="gap-2 ml-auto"
+                        >
+                          Show Run history
+                          <Clock className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* ================= RIGHT ================= */}
           <aside className="p-6 space-y-6 bg-[#f8f9fb]">
-            <h3 className="text-xs font-semibold uppercase text-slate-600">
-              System
-            </h3>
+            <Collapsible defaultOpen className="space-y-2 bg-[#f8f9fb]">
+              {/* Header */}
+              <CollapsibleTrigger asChild>
+                <button
+                  className="
+            w-full flex items-center justify-between
+            text-xs font-semibold uppercase text-slate-600
+            hover:text-slate-800 transition
+          "
+                >
+                  <span>System</span>
+                  <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                </button>
+              </CollapsibleTrigger>
 
-            <SystemMonitorNew />
+              {/* Content */}
+              <CollapsibleContent
+                className="
+      overflow-hidden
+      data-[state=open]:animate-collapsible-down
+      data-[state=closed]:animate-collapsible-up
+    "
+              >
+                <SystemMonitorNew />
+              </CollapsibleContent>
+            </Collapsible>
 
             <Separator />
 
+
+
             <h3 className="text-xs font-semibold uppercase text-slate-600">
-              Project Files
+              Analysis Files
             </h3>
 
-            <div className="border rounded bg-white p-3">
-              <ProjectFileTree project={twine} />
+            <div className="rounded">
+              <ScrollArea className="w-[280px] p-3">
+                <ProjectFileTree project={twine} />
+              </ScrollArea>
             </div>
           </aside>
         </div>

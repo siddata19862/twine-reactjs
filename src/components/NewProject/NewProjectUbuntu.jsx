@@ -88,7 +88,7 @@ export default function NewProjectUbuntu() {
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold">New Project</h2>
+                <h2 className="text-sm font-semibold">Start a New Analysis</h2>
                 <p className="mt-1 text-xs text-slate-600">
                   Create a new analysis workspace
                 </p>
@@ -108,7 +108,7 @@ export default function NewProjectUbuntu() {
 
             {/* Output Directory */}
             <div className="space-y-1">
-              <Label className="text-xs">Project Folder</Label>
+              <Label className="text-xs">Analysis Output Folder</Label>
 
               <div className="flex gap-2">
                 <Input
@@ -200,7 +200,7 @@ export default function NewProjectUbuntu() {
                   active:bg-[#dde1e6]
                 "
               >
-                Create Project
+                Create Analysis
               </Button>
             </div>
           </section>
