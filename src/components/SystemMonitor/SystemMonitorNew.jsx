@@ -18,10 +18,6 @@ function Bar({ value, color }) {
   )
 }
 
-/* =====================================================
-   GENERIC USAGE DIAL
-===================================================== */
-
 function UsageDial({ value, size = 100 }) {
   const stroke = size <= 60 ? 2 : 3
   const r = size / 2 - stroke
@@ -104,17 +100,53 @@ function formatUptime(seconds = 0) {
    MAIN SYSTEM MONITOR
 ===================================================== */
 
-export default function SystemMonitorNew() {
+export default function SystemMonitorNew({ mode = "vertical" }) {
   const statsFromIPC = useSystemStore(s => s.stats)
   const infoFromIPC  = useSystemStore(s => s.info)
-
-  
-  
 
   const history = useRollingHistory()
   const [stats, setStats] = useState(null)
 
+  /* ---------- LAYOUT MODES ---------- */
+
+  const isHorizontal = mode === "horizontal"
+
+  const layout = {
+    root: isHorizontal
+      ? "flex gap-6 items-start"
+      : "space-y-5",
+
+    cpuBlock: isHorizontal
+      ? "flex flex-col gap-3 w-[360px]"
+      : "space-y-2",
+
+    cpuInner: isHorizontal
+      ? "flex items-start gap-4"
+      : "flex gap-4 items-start",
+
+    cpuDial: isHorizontal
+      ? "shrink-0"
+      : "",
+
+    cpuCores: isHorizontal
+      ? "flex-1"
+      : "",
+
+    graphIndent: isHorizontal
+      ? "pl-0"
+      : "pl-[76px]",
+
+    ramMini: isHorizontal
+      ? "flex items-center gap-3"
+      : "pl-[76px] flex items-center gap-3 pt-2",
+
+    ramBlock: isHorizontal
+      ? "flex flex-col gap-3 w-[360px]"
+      : "space-y-2",
+  }
+
   /* ---------- LIVE STATS ---------- */
+
   useEffect(() => {
     if (!statsFromIPC) return
 
@@ -142,43 +174,51 @@ export default function SystemMonitorNew() {
   const info = infoFromIPC ?? {}
 
   return (
-    <div className="space-y-5 text-xs text-slate-700">
+    <div className={`${layout.root} text-xs text-slate-700`}>
 
       {/* ================= CPU ================= */}
-      <div className="space-y-2">
+      <div className={layout.cpuBlock}>
 
+        {/* SYSTEM INFO */}
+        {info && (
+          <div className="border-t pt-2 text-[10px] text-slate-500 grid grid-cols-2 gap-x-6 gap-y-1">
+            <div>OS: <span className="text-slate-700">{info.os.platform}</span></div>
+            <div>Arch: <span className="text-slate-700">{info.os.arch}</span></div>
 
-        {/* ================= SYSTEM INFO (STATIC) ================= */}
-      {info && (
-        <div className="border-t pt-2 text-[10px] text-slate-500 grid grid-cols-2 gap-x-6 gap-y-1">
-          <div>OS: <span className="text-slate-700">{info.os.platform}</span></div>
-          <div>Arch: <span className="text-slate-700">{info.os.arch}</span></div>
+            <div className="col-span-2 truncate">
+              CPU:{" "}
+              <span className="text-slate-700">
+                {info.cpu.model} ({info.cpu.speedMHz}MHz)
+              </span>
+            </div>
 
-          <div className="col-span-2 truncate">
-            CPU: <span className="text-slate-700">{info.cpu.model} ({info.cpu.speedMHz}MHz)</span>
+            <div>Cores: <span className="text-slate-700">{info.cpu.cores}</span></div>
+            <div>
+              Uptime:{" "}
+              <span className="text-slate-700">
+                {formatUptime(info.os.uptime)}
+              </span>
+            </div>
+
+            <div className="col-span-2">
+              Memory:{" "}
+              <span className="text-slate-700">
+                {info.memory.totalMB} MB
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* CPU DIAL + CORES (SIDE-BY-SIDE IN HORIZONTAL MODE) */}
+        <div className={layout.cpuInner}>
+
+          {/* DIAL */}
+          <div className={layout.cpuDial}>
+            <UsageDial value={stats.cpu.total} size={100} />
           </div>
 
-          <div>Cores: <span className="text-slate-700">{info.cpu.cores}</span></div>
-          <div>
-            Uptime:{" "}
-            <span className="text-slate-700">
-              {formatUptime(info.os.uptime)}
-            </span>
-          </div>
-
-          <div className="col-span-2">
-            Memory:{" "}
-            <span className="text-slate-700">
-              {info.memory.totalMB} MB
-            </span>
-          </div>
-        </div>
-      )}
-        <div className="flex gap-4 items-start">
-          
-          <UsageDial value={stats.cpu.total} size={100} />
-
-          <div className="space-y-1">
+          {/* CORES */}
+          <div className={`space-y-1 ${layout.cpuCores}`}>
             <div className="flex items-center gap-2">
               <span className="w-10 font-medium">CPU</span>
               <Bar
@@ -204,12 +244,11 @@ export default function SystemMonitorNew() {
           </div>
         </div>
 
-        <div className="pl-[76px]">
+        <div className={layout.graphIndent}>
           <LineGraph data={history.cpu} color="#6366f1" />
         </div>
 
-        {/* RAM MINI DIAL */}
-        <div className="pl-[76px] flex items-center gap-3 pt-2">
+        <div className={layout.ramMini}>
           <UsageDial value={stats.ram.percent} size={52} />
           <div className="text-[10px] text-slate-500">
             <div className="font-medium text-slate-600">RAM</div>
@@ -221,7 +260,7 @@ export default function SystemMonitorNew() {
       </div>
 
       {/* ================= RAM ================= */}
-      <div className="space-y-2">
+      <div className={layout.ramBlock}>
         <div className="flex items-center gap-2">
           <span className="w-10 font-medium">RAM</span>
           <MemoryBlocks percent={stats.ram.percent} />
@@ -235,8 +274,6 @@ export default function SystemMonitorNew() {
 
         <LineGraph data={history.ram} color="#10b981" />
       </div>
-
-      
 
       {/* ================= EXTRAS ================= */}
       <div className="flex justify-between text-[10px] text-slate-500">

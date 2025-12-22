@@ -5,6 +5,7 @@ import {
   FileText,
   Loader2,
   ChevronRight,
+  Check,
   ChevronDown,
   AlertTriangle,
   Info,
@@ -217,7 +218,7 @@ export default function ProjectPageUbuntu() {
   useEffect(() => {
     if (!twine) return
     console.log("syncing");
-    window.electron.invoke("fs:startSync", twine.path)
+    window.electron.invoke("fs:startSync", twine.projectDir)
   }, [twine])
 
   /* ---------------- actions ---------------- */
@@ -286,12 +287,14 @@ export default function ProjectPageUbuntu() {
 
       {/* ---------------- MAIN ---------------- */}
       <main className="mx-auto max-w-6xl px-6 py-6">
+        
+        
         <div className="
-          grid grid-cols-[3fr_2fr]
-          border border-[#d6dbe0]
-          bg-white
-          shadow-sm
-        ">
+  grid grid-cols-[4fr_1fr]
+  border border-[#d6dbe0]
+  bg-white
+  shadow-sm
+">
 
           {/* ================= LEFT ================= */}
           <section className="p-6 space-y-6 border-r border-[#e2e6ea]">
@@ -697,6 +700,13 @@ export default function ProjectPageUbuntu() {
   >
     Logs
   </Button>
+    <Button
+    variant="outline"
+    onClick={() =>navigate("/output")}
+  >
+    results
+  </Button>
+  
 </div>
                 <LiveLogStream
                   subscribe={(cb) => {
@@ -707,6 +717,51 @@ export default function ProjectPageUbuntu() {
                 <PipelinePanel />
               </div>
             )}
+
+
+            {activeStep === 4 && (
+  <div className="space-y-4">
+    <div className="rounded-lg border bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-4">
+        <div className="mt-1 rounded-full bg-emerald-100 p-2">
+          <Check className="h-5 w-5 text-emerald-600" />
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <h3 className="text-sm font-semibold text-slate-900">
+            Outputs are ready
+          </h3>
+
+          <p className="text-sm text-slate-600">
+            The pipeline has completed successfully. All generated outputs,
+            reports, and logs are now available for review.
+          </p>
+
+          <div className="pt-3 flex flex-wrap gap-3">
+            <Button
+              size="sm"
+              onClick={() => navigate("/output")}
+              className="gap-2"
+            >
+              View outputs
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActiveStep(3)}
+              className="gap-2"
+            >
+              Show run history
+              <Calendar className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
           </section>
 
           {/* ================= RIGHT ================= */}

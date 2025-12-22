@@ -88,36 +88,7 @@ export default function HeaderBar() {
           <Home className="h-4 w-4" />
         </button>
 
-        <div className="leading-tight">
-          <h1 className="text-sm font-semibold text-slate-800">
-            {twine?.name ?? "No project loaded"}
-          </h1>
-
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Active Twine project
-            </div>
-
-            <span className="text-slate-300">•</span>
-
-            <button
-              onClick={() =>
-                twine?.projectDir &&
-                window.electron?.invoke(
-                  "project:openFolder",
-                  twine.projectDir
-                )
-              }
-              className="flex items-center gap-1 hover:text-slate-700"
-            >
-              <FolderOpen className="h-3.5 w-3.5" />
-              <span className="underline-offset-2 hover:underline">
-                Open folder
-              </span>
-            </button>
-          </div>
-        </div>
+        
       </div>
 
       {/* ======================================================

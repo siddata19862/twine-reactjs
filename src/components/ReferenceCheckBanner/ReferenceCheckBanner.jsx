@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Loader2, CheckCircle } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ReferenceCheckBanner() {
   const [refStatus, setRefStatus] = useState(null)
@@ -23,7 +24,11 @@ export default function ReferenceCheckBanner() {
       }
     }
 
-    check()
+    setTimeout(function()
+{
+check()
+},500);
+    
     return () => {
       mounted = false
     }
@@ -44,8 +49,18 @@ export default function ReferenceCheckBanner() {
     }
   }
 
-  if (!refStatus) return null
-
+  if (!refStatus) {
+  return (
+    <div className="mb-4">
+      <div className="rounded-lg border bg-background p-4 space-y-3">
+        <Skeleton className="h-4 w-48" />     {/* title */}
+        <Skeleton className="h-3 w-full" />   {/* line 1 */}
+        <Skeleton className="h-3 w-5/6" />    {/* line 2 */}
+        <Skeleton className="h-8 w-32 mt-2" />{/* button */}
+      </div>
+    </div>
+  )
+}
   // --------------------------------------------------
   // ✅ ALL PRESENT → SUCCESS BOX
   // --------------------------------------------------
