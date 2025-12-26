@@ -144,6 +144,7 @@ export default function ProjectPageUbuntu() {
     window.electron.invoke("fs:startSync", twine.projectDir)
 
     if(twine?.status && twine.status=="completed") setActiveStep(4)
+      if(twine?.config?.status=="started") setActiveStep(3)
     //window.electron.invoke("docker:logs","twine-"+twine?.projectId);
   }, [twine]);
 
@@ -270,9 +271,19 @@ export default function ProjectPageUbuntu() {
   }*/
   const runPipeline = async () => {
     const res = await window.pipeline.run()
+
     console.log(res);
     if (res.ok == false) {
       alert("Docker Daemon is not running! Please start Docker first...");
+    }
+    else
+    {
+      setTimeout(function(){
+        window.electron.invoke(
+          "docker:logs",
+          "twine-" + twine?.projectId
+        )
+      },1000);
     }
   }
 
@@ -319,7 +330,7 @@ export default function ProjectPageUbuntu() {
             <div className="flex gap-1 rounded bg-slate-100 p-1">
               {steps.map((s, i) => (
                 <button
-                  disabled={twine?.status && twine.status=="completed"}
+                  disabled={(twine?.status && twine.status=="completed") || twine?.config?.status=="started"}
                   key={s}
                   onClick={() => setActiveStep(i)}
                   className={`
@@ -407,6 +418,16 @@ export default function ProjectPageUbuntu() {
                     </div>
                   )
                 })}
+
+                <div className="flex justify-end">
+  <Button
+    onClick={() => setActiveStep(1)}
+    variant="outline"
+    className="h-8 text-xs"
+  >
+    Go to Next Step
+  </Button>
+</div>
               </div>
             )}
 
@@ -488,7 +509,7 @@ export default function ProjectPageUbuntu() {
 
                       <Button
                         disabled={!twine?.config?.csv}
-                        onClick={handleExportCSV}
+                        onClick={()=>setActiveStep(2)}
                         variant="outline"
                         className="h-8 text-xs"
                       >
@@ -741,6 +762,16 @@ export default function ProjectPageUbuntu() {
                   Default settings are recommended for most users. Advanced parameters
                   will be configurable later.
                 </p>
+
+                <div className="flex justify-end">
+  <Button
+    onClick={() => setActiveStep(3)}
+    variant="outline"
+    className="h-8 text-xs"
+  >
+    Go to Next Step
+  </Button>
+</div>
               </div>
             )}
 
@@ -750,10 +781,10 @@ export default function ProjectPageUbuntu() {
 
 
 
-                {!twine?.status && <ReferenceCheckBanner />}
+                {!twine?.status && (twine?.config?.status!="started") && <ReferenceCheckBanner />}
 
                 <div className="mt-6 flex items-center gap-3">
-                  {!twine?.status && <Button onClick={runPipeline}>
+                  {!twine?.status && <Button disabled={twine?.config?.status=="started"} onClick={runPipeline}>
                     Start analysis
                   </Button>}
 
@@ -767,6 +798,13 @@ export default function ProjectPageUbuntu() {
                     }}
                   >
                     Logs
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveStep(4)}
+                  >
+                    Show Output
                   </Button>
 
 
@@ -876,9 +914,34 @@ export default function ProjectPageUbuntu() {
 
 
 
-            <h3 className="text-xs font-semibold uppercase text-slate-600">
-              Analysis Files
-            </h3>
+            <h3
+  className="
+    flex items-center justify-between
+    text-xs font-semibold uppercase text-slate-600
+  "
+>
+  <span>Analysis Files</span>
+
+  <button
+    onClick={() =>
+      twine?.projectDir &&
+      window.electron?.invoke("project:openFolder", twine.projectDir)
+    }
+    className="
+      flex items-center gap-1
+      text-slate-500
+      hover:text-slate-800
+      hover:underline
+      underline-offset-4
+      cursor-pointer
+      normal-case
+      font-medium
+    "
+  >
+    <FolderOpen className="h-3.5 w-3.5" />
+    Open folder
+  </button>
+</h3>
 
             <div className="rounded">
               <ScrollArea className="w-[280px] p-3">
